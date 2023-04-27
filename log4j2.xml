@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration statusShipment="debug">
+    <Properties>
+        <Property name="filename">log.txt</Property>
+        <Property name="log-path">logs</Property>
+    </Properties>
+    <Appenders>
+        <RollingFile name="RollingFile" fileName="${log-path}/${filename}"
+                     filePattern="${log-path}/log-%d{yyyy-MM-dd}.txt">
+            <PatternLayout charset="UTF-8">
+                <Pattern>[%d{yyyy/MM/dd HH:mm:ss}][%level]: %m%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="14"/>
+        </RollingFile>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout charset="UTF-8">
+                <Pattern>[%d{yyyy/MM/dd HH:mm:ss}][%level]: %m%n</Pattern>
+            </PatternLayout>
+        </Console>
+    </Appenders>
+     
+    <Loggers>
+        <Logger name="org.apache.logging.log4j.file" level="debug" additivity="false">
+            <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Root level="trace">
+            <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>

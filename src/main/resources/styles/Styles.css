@@ -1,0 +1,64 @@
+/* CSS for app */
+* {
+    -fx-bluskies: linear-gradient(to right, #56ccf2, #2f80ed);
+    -fx-gray: linear-gradient(to right, #d3cce3, #e9e4f0);
+    -fx-mojoto: linear-gradient(to right, #1d976c, #93f9b9);
+    -fx-color-line: #d5d5d5;
+    -fx-color-red: #F32817;
+    -fx-color-blue: #2f80ed;
+    -fx-custom-green: linear-gradient(to right, #00CC33, #009966);
+    -fx-custom-orange: linear-gradient(to right,#FF9900, orangered);
+    -fx-custom-red: linear-gradient(to right,orangered, red);
+    -fx-custom-gray: linear-gradient(to right,#78909C, #37474F);
+    -fx-custom-blue: linear-gradient(to right, blue, blue);
+}
+
+.buttonBeautiful-green {
+    -fx-background-color: -fx-custom-green;
+    -fx-background-radius: 20;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+.buttonBeautiful-orange {
+    -fx-background-color: -fx-custom-orange;
+    -fx-background-radius: 20;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+.buttonBeautiful-red {
+    -fx-background-color: -fx-custom-red;
+    -fx-background-radius: 20;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+.buttonBeautiful-gray {
+    -fx-background-color: -fx-custom-gray;
+    -fx-background-radius: 20;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+.buttonBeautiful-blue {
+    -fx-background-color: #0099FF;
+    -fx-background-radius: 20;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+.buttonBeautiful-green:disabled, .buttonBeautiful-orange:disabled, .buttonBeautiful-red:disabled, .buttonBeautiful-gray:disabled {
+    -fx-background-color: gray;
+    -fx-background-radius: 20;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+

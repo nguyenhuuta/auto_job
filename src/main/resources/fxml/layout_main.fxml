@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<AnchorPane prefHeight="600.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.webseleniumdriver.gui.main.MainController">
+    <children>
+        <ListView fx:id="listViewAccount" layoutX="14.0" layoutY="14.0" AnchorPane.bottomAnchor="50.0"
+                  AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="50.0"/>
+        <Label alignment="CENTER" layoutX="272.0" layoutY="14.0" text="アカウント管理" AnchorPane.leftAnchor="5.0"
+               AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+            <font>
+                <Font name="Arial Bold" size="16.0"/>
+            </font>
+        </Label>
+        <JFXButton fx:id="btnLogout" layoutX="59.0" layoutY="561.0" ripplerFill="RED" text="ログアウト"
+                   AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="10.0">
+            <graphic>
+                <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                    <image>
+                        <Image url="@../images/logout.png"/>
+                    </image>
+                </ImageView>
+            </graphic>
+            <font>
+                <Font size="13.0"/>
+            </font>
+        </JFXButton>
+        <JFXButton fx:id="btnReload" ripplerFill="RED" text="リロード" AnchorPane.rightAnchor="10.0"
+                   AnchorPane.topAnchor="5.0">
+            <graphic>
+                <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                    <image>
+                        <Image url="@../images/refresh.png"/>
+                    </image>
+                </ImageView>
+            </graphic>
+            <font>
+                <Font size="13.0"/>
+            </font>
+        </JFXButton>
+        <Label fx:id="lbVersion" alignment="CENTER_RIGHT" layoutX="380.0" layoutY="555.0" text="Version"
+               AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="5.0">
+            <font>
+                <Font size="13.0"/>
+            </font>
+        </Label>
+    </children>
+</AnchorPane>
