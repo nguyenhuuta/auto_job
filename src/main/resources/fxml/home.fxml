@@ -7,7 +7,7 @@
 
 <TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="615.0"
          prefWidth="862.0" tabClosingPolicy="UNAVAILABLE" xmlns:fx="http://javafx.com/fxml/1"
-         fx:controller="com.webseleniumdriver.HomeController"
+         fx:controller="com.autojob.HomeController"
          fx:id="tabEcommerce"
          xmlns="http://javafx.com/javafx/18">
 
