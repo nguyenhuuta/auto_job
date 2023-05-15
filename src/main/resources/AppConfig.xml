@@ -2,8 +2,8 @@
 <launch4jConfig>
     <dontWrapJar>false</dontWrapJar>
     <headerType>gui</headerType>
-    <jar>D:\Project\yahooauctionjob\classes\artifacts\YahooAuctionJob\YahooAuctionJob.jar</jar>
-    <outfile>D:\Project\yahooauctionjob\classes\artifacts\YahooAuctionJob\YahooAuctionJob.exe</outfile>
+<!--    <jar>D:\Project\yahooauctionjob\classes\artifacts\YahooAuctionJob\YahooAuctionJob.jar</jar>-->
+<!--    <outfile>D:\Project\yahooauctionjob\classes\artifacts\YahooAuctionJob\YahooAuctionJob.exe</outfile>-->
     <errTitle></errTitle>
     <cmdLine></cmdLine>
     <chdir>.</chdir>
@@ -30,7 +30,7 @@
         <copyright>DKS</copyright>
         <productVersion>1.1.0.0</productVersion>
         <txtProductVersion>1.10</txtProductVersion>
-        <productName>WebSeleniumDriver</productName>
+        <productName>AutoJob</productName>
         <companyName>DKS</companyName>
         <internalName>OpenYourEyes</internalName>
         <originalFilename>DKS.exe</originalFilename>

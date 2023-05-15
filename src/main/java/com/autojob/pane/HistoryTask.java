@@ -1,11 +1,11 @@
 package com.autojob.pane;
 
-import com.jfoenix.controls.JFXButton;
 import com.autojob.base.BaseController;
 import com.autojob.model.entities.AccountModel;
 import com.autojob.model.entities.MessageListView;
 import com.autojob.shopee.ShopeeTask;
 import javafx.application.Platform;
+import javafx.scene.control.Button;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Priority;
@@ -27,7 +27,7 @@ public class HistoryTask extends VBox {
         Text shopName = new Text(accountModel.shopName);
         boolean disable = accountModel.lastOrderId.isEmpty();
         String textButton = disable ? "Chưa có lastOrderId" : "Gửi cảm ơn";
-        JFXButton button = new JFXButton(textButton);
+        Button button = new Button(textButton);
         button.setDisable(disable);
         getChildren().add(shopName);
         getChildren().add(listView);

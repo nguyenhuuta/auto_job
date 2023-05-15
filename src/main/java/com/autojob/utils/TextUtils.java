@@ -2,7 +2,7 @@ package com.autojob.utils;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.sun.org.apache.xerces.internal.impl.io.UTF8Reader;
+//import com.sun.org.apache.xerces.internal.impl.io.UTF8Reader;
 import okhttp3.Headers;
 import org.openqa.selenium.Cookie;
 
@@ -62,26 +62,26 @@ public class TextUtils {
             return null;
         }
     }
-
-    public static Set<Cookie> getCookieFromFile(String path) {
-        Gson gson = new Gson();
-        Set<Cookie> cookies = new HashSet<>();
-        BufferedReader bw;
-        File file = new File(path);
-        if (!file.exists()) return cookies;
-        try {
-            bw = new BufferedReader(new UTF8Reader(new FileInputStream(file)));
-            String cookie = bw.readLine();
-            if (cookie != null && !cookie.isEmpty()) {
-                cookies = gson.fromJson(cookie, new TypeToken<Set<Cookie>>() {
-                }.getType());
-            }
-            bw.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return cookies;
-    }
+//
+//    public static Set<Cookie> getCookieFromFile(String path) {
+//        Gson gson = new Gson();
+//        Set<Cookie> cookies = new HashSet<>();
+//        BufferedReader bw;
+//        File file = new File(path);
+//        if (!file.exists()) return cookies;
+//        try {
+//            bw = new BufferedReader(new UTF8Reader(new FileInputStream(file)));
+//            String cookie = bw.readLine();
+//            if (cookie != null && !cookie.isEmpty()) {
+//                cookies = gson.fromJson(cookie, new TypeToken<Set<Cookie>>() {
+//                }.getType());
+//            }
+//            bw.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return cookies;
+//    }
 
     public static void saveCookieToFile(Set<Cookie> cookies, String path) {
         try {

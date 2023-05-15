@@ -1,7 +1,6 @@
 package com.autojob.utils;
 
 import com.autojob.App;
-import com.autojob.database.DatabaseHelper;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -200,14 +199,14 @@ public class Utils {
         }
     }
 
-    public static void deleteCookie(String accountId) {
-        try {
-            File file = new File(DatabaseHelper.DIRECTORY + "/" + accountId + ".txt");
-            file.delete();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
+//    public static void deleteCookie(String accountId) {
+//        try {
+//            File file = new File(DatabaseHelper.DIRECTORY + "/" + accountId + ".txt");
+//            file.delete();
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//        }
+//    }
 
     public static void deleteFile(String path) {
         try {

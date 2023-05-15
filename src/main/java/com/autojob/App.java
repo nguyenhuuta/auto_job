@@ -1,8 +1,9 @@
 package com.autojob;
 
-import com.autojob.database.DatabaseHelper;
 import com.autojob.gui.splash.SplashScreen;
-import com.autojob.utils.*;
+import com.autojob.utils.IRegisterStopApp;
+import com.autojob.utils.Utils;
+import com.autojob.utils.WebDriverUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -34,7 +35,7 @@ public class App extends Application {
     }
 
     static {
-        DatabaseHelper.getInstance();
+//        DatabaseHelper.getInstance();
     }
 
     public static void setupWebDriver() {

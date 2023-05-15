@@ -16,7 +16,9 @@ public class HomeStage extends Stage {
             Parent root = FXMLLoader.load(getClass().getResource("/fxml/home.fxml"));
             stage.setTitle("Home");
             stage.centerOnScreen();
-            stage.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+            scene.getRoot().setStyle("-fx-font-family: 'serif'");
+            stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();

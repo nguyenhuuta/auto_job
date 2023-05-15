@@ -17,7 +17,9 @@ public class MainStage extends Stage {
             stage.setMinHeight(600);
             stage.setWidth(601);
             stage.setHeight(601);
-            stage.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+            scene.getRoot().setStyle("-fx-font-family: 'serif'");
+            stage.setScene(scene);
         } catch (IOException e) {
             e.printStackTrace();
         }
