@@ -223,16 +223,6 @@ public class WebDriverUtils {
         return createWebDriver(visible, wight, height);
     }
 
-    public WebDriver reloadWebDriver(WebDriver webDriver, ChromeSetting chromeSetting) {
-        if (webDriver != null) {
-            try {
-                webDriver.close();
-            } catch (Exception ex) {
-                Logger.error("Reload close web driver error");
-            }
-        }
-        return createWebDriver(chromeSetting);
-    }
 
     public static boolean isElementPresentAndDisplayed(WebElement element) {
         try {
@@ -266,5 +256,4 @@ public class WebDriverUtils {
             ((WebStorage) webDriver).getLocalStorage().setItem(valueObject.getKey(), String.valueOf(valueObject.getValue()));
         }
     }
-
 }

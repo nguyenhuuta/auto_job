@@ -24,16 +24,21 @@ public class ShopeeController extends BaseController {
 
     void init() {
         task = new ShopeeTask(accountModel);
-        executorService.scheduleWithFixedDelay(task, 1, 10, TimeUnit.MINUTES);
+//        executorService.scheduleWithFixedDelay(task, 1, 10, TimeUnit.MINUTES);
+    }
+
+//    @Override
+//    public BehaviorSubject<MessageListView> triggerCurrentHistory() {
+//        return task.triggerCurrentHistory;
+//    }
+
+    @Override
+    public void runNow() {
+        executorService.scheduleWithFixedDelay(task, 0, 10, TimeUnit.MINUTES);
     }
 
     @Override
-    public BehaviorSubject<MessageListView> triggerCurrentHistory() {
-        return task.triggerCurrentHistory;
-    }
-
-    @Override
-    public void startJob(int jobId) {
+    public void changeJob(int jobId) {
         task.currentJob = jobId;
         executorService.execute(task);
     }
@@ -41,6 +46,11 @@ public class ShopeeController extends BaseController {
     @Override
     public void stopJob() {
         task.status = BaseWebViewTask.FORCE_STOP;
+    }
+
+    @Override
+    public void bringDriverToFront() {
+
     }
 }
 

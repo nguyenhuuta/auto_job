@@ -3,6 +3,7 @@ package com.autojob.gui.splash;
 import com.autojob.App;
 import com.autojob.HomeStage;
 import com.autojob.utils.CheckChrome;
+import com.autojob.utils.Logger;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -33,6 +34,7 @@ public class SplashScreen extends BorderPane {
         setCenter(maincontent);
 
         CheckChrome.startCheckChrome(() -> {
+            Logger.info("startCheckChrome -> DONE");
             Platform.runLater(() -> {
                 new HomeStage(App.getInstance().getStage());
             });

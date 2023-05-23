@@ -28,7 +28,7 @@ public class ShopeeTask extends BaseWebViewTask {
     int currentJob = JOB_SEND_THANK_YOU;
 
     public ShopeeTask(AccountModel accountModel) {
-        super(accountModel);
+        super(accountModel, null);
     }
 
     @Override
@@ -113,7 +113,7 @@ public class ShopeeTask extends BaseWebViewTask {
     void updateAccountShopee(String orderId) {
         AccountBody body = new AccountBody(orderId, accountModel.rowId);
         try {
-            Call<BaseResponse<String>> call = ApiManager.GOOGLE_ENDPOINT.updateAccountShopee(ApiManager.URL_SHOPEE, body);
+            Call<BaseResponse<String>> call = ApiManager.GOOGLE_ENDPOINT.updateAccountShopee(ApiManager.URL_GOOGLE_SHEET, body);
             String message = RequestQueue.getInstance().executeRequest(call);
             updateListView("Lưu " + orderId + " lên GoogleDriver " + message);
         } catch (InterruptedException e) {
@@ -395,26 +395,6 @@ public class ShopeeTask extends BaseWebViewTask {
             delaySecond(2);
             element = getElementByClassName("notification-list");
             print("LOAD DONE: " + (element != null));
-        } while (element == null);
-        return element;
-    }
-
-    private WebElement checkDoneByClass(String key) {
-        WebElement element;
-        do {
-            delaySecond(2);
-            element = getElementByClassName(key);
-            print("CheckDone: " + (element != null));
-        } while (element == null);
-        return element;
-    }
-
-    private WebElement checkDoneById(String key) {
-        WebElement element;
-        do {
-            delaySecond(2);
-            element = getElementById(key);
-            print("CheckDone: " + (element != null));
         } while (element == null);
         return element;
     }

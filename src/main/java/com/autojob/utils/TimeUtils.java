@@ -97,4 +97,10 @@ public class TimeUtils {
         c.add(Calendar.MINUTE, min);
         return c.getTime();
     }
+
+    public static String addMinute(int min) {
+        Calendar c = Calendar.getInstance();
+        c.add(Calendar.MINUTE, min);
+        return getStringFromDate(c.getTime(), formatDate1);
+    }
 }

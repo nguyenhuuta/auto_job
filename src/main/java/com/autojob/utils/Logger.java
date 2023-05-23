@@ -53,7 +53,7 @@ public class Logger {
 
 
     public static String getLogMessage(String tag, String message) {
-        return String.format("%s - %s", tag, message.replaceAll("apptool", "a"));
+        return String.format("%s - %s", tag, message);
     }
 
     public static synchronized void setup() {

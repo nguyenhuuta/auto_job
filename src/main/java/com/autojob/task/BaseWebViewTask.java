@@ -1,32 +1,33 @@
 package com.autojob.task;
 
-import com.autojob.model.entities.AccountModel;
-import com.autojob.model.entities.ChromeSetting;
-import com.autojob.model.entities.MessageListView;
-import com.autojob.utils.Logger;
-import com.autojob.utils.Utils;
-import com.autojob.utils.WebDriverUtils;
+import com.autojob.App;
+import com.autojob.api.ApiManager;
+import com.autojob.api.RequestQueue;
+import com.autojob.base.WebDriverCallback;
+import com.autojob.model.entities.*;
+import com.autojob.utils.*;
 import javafx.scene.paint.Color;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import retrofit2.Call;
 import rx.subjects.BehaviorSubject;
 import rx.subjects.PublishSubject;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-public abstract class BaseWebViewTask extends TimerTask {
+public abstract class BaseWebViewTask extends TimerTask implements IRegisterStopApp {
     public static final int CAPTCHA = -1;
     public static final int IDLE = 0;
     public static final int RUNNING = 1;
     public static final int FORCE_STOP = 2;
     public int status = IDLE;
 
-
-    public String TAG;
 
     private static final int WEB_DRIVER_WAIT_TIMEOUT = 10;
 
@@ -37,20 +38,36 @@ public abstract class BaseWebViewTask extends TimerTask {
     public WebDriverWait webDriverWait;
 
     public String getTag() {
-        return TAG;
-    }
-
-    public void setTag(String TAG) {
-        this.TAG = TAG;
+        return accountModel.shopName;
     }
 
     public AccountModel accountModel;
-    public BehaviorSubject<MessageListView> triggerCurrentHistory = BehaviorSubject.create();
-    public PublishSubject<Integer> triggerTaskId = PublishSubject.create();
+    public WebDriverCallback webDriverCallback;
 
-    public BaseWebViewTask(AccountModel accountModel) {
+    public BaseWebViewTask(AccountModel accountModel, WebDriverCallback webDriverCallback) {
         this.accountModel = accountModel;
-        startWeb();
+        this.webDriverCallback = webDriverCallback;
+        App.getInstance().registerStopApp(this);
+    }
+
+    public void bringWebDriverToFront() {
+        try {
+            webDriver.switchTo().window(webDriver.getWindowHandle());
+        } catch (Exception ignore) {
+        }
+
+    }
+
+    @Override
+    public void onStopApp() {
+        try {
+            try {
+                webDriver.close();
+            } catch (Exception ignored) {
+            }
+            webDriver.quit();
+        } catch (Exception ignored) {
+        }
     }
 
     public void startWeb() {
@@ -58,7 +75,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         ChromeSetting chromeSetting = new ChromeSetting(true, 0, 0, profilePath, true);
         WebDriver webDriver = WebDriverUtils.getInstance().createWebDriver(chromeSetting);
         setWebDriver(webDriver);
-        updateListView("Start CHROME with profile " + accountModel.shopName);
+        updateListView("Start CHROME");
     }
 
     public void stopWeb() {
@@ -73,7 +90,7 @@ public abstract class BaseWebViewTask extends TimerTask {
     }
 
     public void startJob(int jobId) {
-        triggerTaskId.onNext(jobId);
+//        triggerTaskId.onNext(jobId);
     }
 
     public void stopJob() {
@@ -84,15 +101,19 @@ public abstract class BaseWebViewTask extends TimerTask {
     public abstract String jobName();
 
     public void updateListView(String message) {
-        String content = String.format("[%s] %s", jobName(), message);
-        MessageListView item = new MessageListView(content);
-        triggerCurrentHistory.onNext(item);
+        MessageListView item = formatMessage(message, null);
+        webDriverCallback.updateListView(accountModel.type, item);
     }
 
     public void updateListView(String message, Color color) {
-        String content = String.format("[%s] %s", jobName(), message);
-        MessageListView item = new MessageListView(content, color);
-        triggerCurrentHistory.onNext(item);
+        MessageListView item = formatMessage(message, color);
+        webDriverCallback.updateListView(accountModel.type, item);
+    }
+
+    private MessageListView formatMessage(String message, Color color) {
+        String time = TimeUtils.getCurrentDate(TimeUtils.formatDate1);
+        String content = String.format("%s - [%s][%s] => %s", time, accountModel.shopName, jobName(), message);
+        return new MessageListView(content, color);
     }
 
     public void setWebDriver(WebDriver webDriver) {
@@ -139,7 +160,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         try {
             webDriver.manage().window().maximize();
         } catch (Exception ex) {
-            Logger.warning(TAG, "#maximizeWebDriver false.");
+            Logger.warning(getTag(), "#maximizeWebDriver false.");
         }
     }
 
@@ -162,7 +183,7 @@ public abstract class BaseWebViewTask extends TimerTask {
             try {
                 Thread.sleep(timeUnit.toMillis(time));
             } catch (InterruptedException e) {
-                Logger.warning(TAG, "InterruptedException: " + e.getMessage());
+                Logger.warning(getTag(), "InterruptedException: " + e.getMessage());
             }
         }
     }
@@ -175,7 +196,7 @@ public abstract class BaseWebViewTask extends TimerTask {
                     executeJavaScript("arguments[0].click();", element);
                 }
             } catch (WebDriverException e) {
-                Logger.warning(TAG, "clickElementJs : " + e.getMessage());
+                Logger.warning(getTag(), "clickElementJs : " + e.getMessage());
             }
         }
     }
@@ -185,7 +206,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         try {
             getJavascriptExecutor().executeScript("arguments[0].scrollIntoView(true);", element);
         } catch (Exception e) {
-            Logger.warning(TAG, e.getClass().getSimpleName() + ": " + e.getMessage());
+            Logger.warning(getTag(), e.getClass().getSimpleName() + ": " + e.getMessage());
         }
     }
 
@@ -196,7 +217,7 @@ public abstract class BaseWebViewTask extends TimerTask {
             String scrip = String.format("window.scrollBy(%o,%o)", 0, y);
             getJavascriptExecutor().executeScript(scrip, "");
         } catch (Exception e) {
-            Logger.warning(TAG, e.getClass().getSimpleName() + ": " + e.getMessage());
+            Logger.warning(getTag(), e.getClass().getSimpleName() + ": " + e.getMessage());
         }
     }
 
@@ -205,7 +226,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         try {
             getJavascriptExecutor().executeScript("window.scrollTo(0, 0);");
         } catch (Exception e) {
-            Logger.warning(TAG, e.getClass().getSimpleName() + ": " + e.getMessage());
+            Logger.warning(getTag(), e.getClass().getSimpleName() + ": " + e.getMessage());
         }
     }
 
@@ -214,7 +235,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         try {
             getJavascriptExecutor().executeScript("window.scrollTo(0, document.body.scrollHeight);");
         } catch (Exception e) {
-            Logger.warning(TAG, e.getClass().getSimpleName() + ": " + e.getMessage());
+            Logger.warning(getTag(), e.getClass().getSimpleName() + ": " + e.getMessage());
         }
     }
 
@@ -239,7 +260,7 @@ public abstract class BaseWebViewTask extends TimerTask {
             } while (end == 0);
 
         } catch (Exception e) {
-            Logger.warning(TAG, e.getClass().getSimpleName() + ": " + e.getMessage());
+            Logger.warning(getTag(), e.getClass().getSimpleName() + ": " + e.getMessage());
         }
     }
 
@@ -260,7 +281,7 @@ public abstract class BaseWebViewTask extends TimerTask {
             }
 
         } catch (Exception e) {
-            Logger.warning(TAG, e.getClass().getSimpleName() + ": " + e.getMessage());
+            Logger.warning(getTag(), e.getClass().getSimpleName() + ": " + e.getMessage());
         }
     }
 
@@ -284,7 +305,7 @@ public abstract class BaseWebViewTask extends TimerTask {
                     element.click();
                 }
             } catch (WebDriverException e) {
-                Logger.warning(TAG, "WebDriverException: " + e.getMessage());
+                Logger.warning(getTag(), "WebDriverException: " + e.getMessage());
             }
         }
     }
@@ -298,7 +319,7 @@ public abstract class BaseWebViewTask extends TimerTask {
                 actions.moveToElement(element);
                 actions.build().perform();
             } catch (WebDriverException e) {
-                Logger.warning(TAG, "WebDriverException: " + e.getMessage());
+                Logger.warning(getTag(), "WebDriverException: " + e.getMessage());
             }
         }
     }
@@ -313,7 +334,7 @@ public abstract class BaseWebViewTask extends TimerTask {
 
     private void openUrl(String url, int time) {
         if (!isValidTaskInRunning()) return;
-        Logger.d(TAG, "openUrl " + url + " - time " + time);
+        Logger.d(getTag(), "openUrl " + url + " - time " + time);
         try {
             getWebDriver().get(url);
         } catch (Exception ex) {
@@ -370,7 +391,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         try {
             return webDriverWait.until(expectedCondition);
         } catch (Exception e) {
-            Logger.warning(TAG, e.getClass().getSimpleName() + ": " + e.getMessage());
+            Logger.warning(getTag(), e.getClass().getSimpleName() + ": " + e.getMessage());
             return null;
         }
     }
@@ -380,7 +401,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         try {
             return webDriverWait.until(expectedCondition);
         } catch (Exception e) {
-            Logger.warning(TAG, "waitUntil Exception : " + expectedCondition.toString());
+            Logger.warning(getTag(), "waitUntil Exception : " + expectedCondition.toString());
             return null;
         }
     }
@@ -390,7 +411,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         try {
             return parentElement.findElement(By.cssSelector(selector));
         } catch (Exception e) {
-            Logger.warning(TAG, "Not found element : " + selector);
+            Logger.warning(getTag(), "Not found element : " + selector);
             return null;
         }
     }
@@ -400,7 +421,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         try {
             return parentElement.findElements(By.cssSelector(selector));
         } catch (Exception e) {
-            Logger.warning(TAG, "Not found element : " + selector);
+            Logger.warning(getTag(), "Not found element : " + selector);
             return null;
         }
     }
@@ -410,7 +431,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         try {
             return getWebDriver().findElements(By.cssSelector(selector));
         } catch (Exception e) {
-            Logger.warning(TAG, "Not found element : " + selector);
+            Logger.warning(getTag(), "Not found element : " + selector);
             return null;
         }
     }
@@ -420,7 +441,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         try {
             return getWebDriver().findElement(By.cssSelector(selector));
         } catch (Exception e) {
-            Logger.warning(TAG, "Not found element : " + selector);
+            Logger.warning(getTag(), "Not found element : " + selector);
             return null;
         }
     }
@@ -430,7 +451,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         try {
             return getWebDriver().findElement(By.xpath(xpath));
         } catch (Exception e) {
-            Logger.warning(TAG, "Not found element : " + xpath);
+            Logger.warning(getTag(), "Not found element : " + xpath);
             return null;
         }
     }
@@ -439,7 +460,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         try {
             return getWebDriver().findElement(By.className(className));
         } catch (Exception e) {
-            Logger.warning(TAG, "Not found element : " + className);
+            Logger.warning(getTag(), "Not found element : " + className);
             return null;
         }
     }
@@ -449,7 +470,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         try {
             return parentElement.findElement(By.className(className));
         } catch (Exception e) {
-            Logger.warning(TAG, "Not found element : " + className);
+            Logger.warning(getTag(), "Not found element : " + className);
             return null;
         }
     }
@@ -459,7 +480,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         try {
             return getWebDriver().findElements(By.className(className));
         } catch (Exception e) {
-            Logger.warning(TAG, "Not found element : " + className);
+            Logger.warning(getTag(), "Not found element : " + className);
             return null;
         }
     }
@@ -472,7 +493,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         try {
             return parentElement.findElements(By.className(className));
         } catch (Exception e) {
-            Logger.warning(TAG, "Not found element : " + className);
+            Logger.warning(getTag(), "Not found element : " + className);
             return null;
         }
     }
@@ -481,7 +502,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         try {
             return webDriver.findElement(By.id(id));
         } catch (Exception e) {
-            Logger.warning(TAG, "Not found element " + id);//e.getClass().getSimpleName() + ": " + e.getMessage()
+            Logger.warning(getTag(), "Not found element " + id);//e.getClass().getSimpleName() + ": " + e.getMessage()
             return null;
         }
     }
@@ -491,7 +512,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         try {
             return parentElement.findElement(By.id(id));
         } catch (Exception e) {
-            Logger.warning(TAG, "Not found element : " + id);
+            Logger.warning(getTag(), "Not found element : " + id);
             return null;
         }
     }
@@ -501,7 +522,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         try {
             return getWebDriver().findElements(By.id(id));
         } catch (Exception e) {
-            Logger.warning(TAG, "Not found element : " + id);
+            Logger.warning(getTag(), "Not found element : " + id);
             return null;
         }
     }
@@ -511,7 +532,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         try {
             return getWebDriver().findElements(By.xpath(xpath));
         } catch (Exception e) {
-            Logger.warning(TAG, "Not found element : " + xpath);
+            Logger.warning(getTag(), "Not found element : " + xpath);
             return null;
         }
     }
@@ -521,7 +542,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         try {
             return parentElement.findElements(By.id(id));
         } catch (Exception e) {
-            Logger.warning(TAG, "Not found element : " + id);
+            Logger.warning(getTag(), "Not found element : " + id);
             return null;
         }
     }
@@ -531,7 +552,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         try {
             return getWebDriver().findElement(By.name(name));
         } catch (Exception e) {
-            Logger.warning(TAG, "Not found element : " + name);
+            Logger.warning(getTag(), "Not found element : " + name);
             return null;
         }
     }
@@ -541,7 +562,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         try {
             return parentElement.findElement(By.name(name));
         } catch (Exception e) {
-            Logger.warning(TAG, "Not found element : " + name);
+            Logger.warning(getTag(), "Not found element : " + name);
             return null;
         }
     }
@@ -551,7 +572,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         try {
             return getWebDriver().findElements(By.name(name));
         } catch (Exception e) {
-            Logger.warning(TAG, "Not found element : " + name);
+            Logger.warning(getTag(), "Not found element : " + name);
             return null;
         }
     }
@@ -561,7 +582,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         try {
             return parent.findElements(By.name(name));
         } catch (Exception e) {
-            Logger.warning(TAG, "Not found element : " + name);
+            Logger.warning(getTag(), "Not found element : " + name);
             return null;
         }
     }
@@ -571,7 +592,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         try {
             return getWebDriver().findElement(By.tagName(name));
         } catch (Exception e) {
-            Logger.warning(TAG, "Not found element : " + name);
+            Logger.warning(getTag(), "Not found element : " + name);
             return null;
         }
     }
@@ -581,7 +602,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         try {
             return parentElement.findElement(By.tagName(name));
         } catch (Exception e) {
-            Logger.warning(TAG, "Not found element : " + name);
+            Logger.warning(getTag(), "Not found element : " + name);
             return null;
         }
     }
@@ -591,7 +612,7 @@ public abstract class BaseWebViewTask extends TimerTask {
         try {
             return parentElement.findElements(By.tagName(name));
         } catch (Exception e) {
-            Logger.warning(TAG, "Not found element : " + name);
+            Logger.warning(getTag(), "Not found element : " + name);
             return null;
         }
     }
@@ -602,7 +623,7 @@ public abstract class BaseWebViewTask extends TimerTask {
             List<WebElement> elements = getWebDriver().findElements(By.cssSelector(cssSelector));
             return elements != null && !elements.isEmpty();
         } catch (Exception e) {
-            Logger.warning(TAG, "Not found element : " + cssSelector);
+            Logger.warning(getTag(), "Not found element : " + cssSelector);
             return false;
         }
     }
@@ -613,7 +634,7 @@ public abstract class BaseWebViewTask extends TimerTask {
             List<WebElement> elements = parentElement.findElements(By.cssSelector(cssSelector));
             return elements != null && !elements.isEmpty();
         } catch (Exception e) {
-            Logger.warning(TAG, "Not found element : " + cssSelector);
+            Logger.warning(getTag(), "Not found element : " + cssSelector);
             return false;
         }
     }
@@ -624,7 +645,7 @@ public abstract class BaseWebViewTask extends TimerTask {
             List<WebElement> elements = getWebDriver().findElements(by);
             return elements != null && !elements.isEmpty();
         } catch (Exception e) {
-            Logger.warning(TAG, e.getClass().getSimpleName() + ": " + e.getMessage());
+            Logger.warning(getTag(), e.getClass().getSimpleName() + ": " + e.getMessage());
             return false;
         }
     }
@@ -635,12 +656,12 @@ public abstract class BaseWebViewTask extends TimerTask {
             List<WebElement> elements = parentElement.findElements(by);
             return elements != null && !elements.isEmpty();
         } catch (Exception e) {
-            Logger.warning(TAG, e.getClass().getSimpleName() + ": " + e.getMessage());
+            Logger.warning(getTag(), e.getClass().getSimpleName() + ": " + e.getMessage());
             return false;
         }
     }
 
-    final void simulateSendKeys(WebElement element, String text) {
+    public final void simulateSendKeys(WebElement element, String text) {
         if (!isValidTaskInRunning()) return;
         if (element != null) {
             element.click();
@@ -648,6 +669,21 @@ public abstract class BaseWebViewTask extends TimerTask {
             Actions actions = new Actions(webDriver);
             for (char c : text.toCharArray()) {
                 actions.sendKeys(Character.toString(c));
+                actions.pause(Utils.getRandomNumber(50, 300));
+            }
+            actions.build().perform();
+        }
+    }
+
+    public final void simulateSendKeys(WebElement element, String[] texts) {
+        if (!isValidTaskInRunning()) return;
+        if (element != null) {
+            element.click();
+            wait(500, TimeUnit.MILLISECONDS);
+            Actions actions = new Actions(webDriver);
+            for (String c : texts) {
+                actions.sendKeys(c);
+                actions.sendKeys(Keys.SHIFT, Keys.ENTER);
                 actions.pause(Utils.getRandomNumber(50, 300));
             }
             actions.build().perform();
@@ -667,10 +703,10 @@ public abstract class BaseWebViewTask extends TimerTask {
         if (!isValidTaskInRunning()) return false;
         try {
             getWebDriver().switchTo().alert();
-            Logger.d(TAG, "#isAlertPresent try: " + getWebDriver().switchTo().alert().getText());
+            Logger.d(getTag(), "#isAlertPresent try: " + getWebDriver().switchTo().alert().getText());
             return true;
         } catch (NoAlertPresentException Ex) {
-            Logger.d(TAG, "#isAlertPresent catch : no alert present");
+            Logger.d(getTag(), "#isAlertPresent catch : no alert present");
             return false;
         }
     }
@@ -691,6 +727,11 @@ public abstract class BaseWebViewTask extends TimerTask {
 
     public void printE(String message) {
         updateListView(message, Color.RED);
+        Logger.error(getTag(), message);
+    }
+
+    public void printException(Exception message) {
+        updateListView(message.toString(), Color.RED);
         Logger.error(getTag(), message);
     }
 
@@ -744,5 +785,38 @@ public abstract class BaseWebViewTask extends TimerTask {
                 delayMilliSecond(500);
             }
         } while (!clickable);
+    }
+
+    public WebElement checkDoneById(String key) {
+        WebElement element;
+        do {
+            delaySecond(2);
+            element = getElementById(key);
+        } while (element == null);
+        print("Key [" + key + "] load done");
+        return element;
+    }
+
+    public WebElement checkDoneByClass(String key) {
+        WebElement element;
+        do {
+            delaySecond(2);
+            element = getElementByClassName(key);
+        } while (element == null);
+        print("Key [" + key + "] load done");
+        return element;
+    }
+
+
+    public void updateAccountGoogleSheet(String orderId) {
+        AccountBody body = new AccountBody(orderId, accountModel.rowId);
+        try {
+            Call<BaseResponse<String>> call = ApiManager.GOOGLE_ENDPOINT.updateAccountShopee(ApiManager.URL_GOOGLE_SHEET, body);
+            String message = RequestQueue.getInstance().executeRequest(call);
+            String text = "Lưu " + orderId + " lên GoogleDriver " + message;
+            updateListView(text.toUpperCase(), Color.ORANGERED);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

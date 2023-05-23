@@ -8,6 +8,7 @@ import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -18,35 +19,24 @@ import rx.subjects.BehaviorSubject;
 /**
  * Created by OpenYourEyes on 25/04/2023
  */
-public class HistoryTask extends VBox {
+public class HistoryListBox extends VBox {
     private final ListView<MessageListView> listView;
+    private final HBox hbox;
 
-    public HistoryTask(BaseController controller) {
+    public HistoryListBox(BaseController controller) {
         listView = new ListView<>();
+        hbox = new HBox();
         AccountModel accountModel = controller.accountModel;
         Text shopName = new Text(accountModel.shopName);
-        boolean disable = accountModel.lastOrderId.isEmpty();
-        String textButton = disable ? "Chưa có lastOrderId" : "Gửi cảm ơn";
-        Button button = new Button(textButton);
-        button.setDisable(disable);
         getChildren().add(shopName);
         getChildren().add(listView);
-        getChildren().add(button);
+        getChildren().add(hbox);
         VBox.setVgrow(listView, Priority.ALWAYS);
-        button.setOnAction(event -> {
-            String text = button.getText();
-            if (text.equals("Gửi cảm ơn")) {
-                button.setText("Đang chạy gửi cảm ơn");
-                controller.startJob(ShopeeTask.JOB_SEND_THANK_YOU);
-            } else {
-                controller.stopJob();
-                button.setText("Dừng");
-            }
-        });
-        listenerDataChange(controller.triggerCurrentHistory());
     }
 
     private void listenerDataChange(BehaviorSubject<MessageListView> receiverData) {
+
+
         listView.setCellFactory(new Callback<ListView<MessageListView>, ListCell<MessageListView>>() {
             @Override
             public ListCell<MessageListView> call(ListView<MessageListView> param) {

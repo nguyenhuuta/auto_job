@@ -7,5 +7,6 @@ public class AccountModel {
     public String shopName;
     public String lastOrderId;
     public String rowId;
-
+    // 1: Shopee, 2: TiktokShop
+    public int type;
 }

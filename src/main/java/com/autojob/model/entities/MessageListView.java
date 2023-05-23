@@ -11,8 +11,14 @@ public class MessageListView {
     public Color color;
 
     public MessageListView(String message, Color color) {
+        this(message);
         this.message = message;
-        this.color = color;
+        if (color == null) {
+            this.color = Color.BLACK;
+        } else {
+            this.color = color;
+        }
+
     }
 
     public MessageListView(String message) {

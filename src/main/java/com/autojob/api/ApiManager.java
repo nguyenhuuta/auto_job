@@ -14,7 +14,7 @@ import java.util.List;
 public interface ApiManager {
 
     ApiManager GOOGLE_ENDPOINT = RetrofitClient.getInstance().getService("https://script.google.com/", ApiManager.class);
-    static String URL_SHOPEE = "macros/s/AKfycbzK8JugCcLRPwXWIevf_oVplm9UjAP6Ix99d-tOw2eld5xiwTr2cjn77Cj5rR72LRN1zg/exec";
+    static String URL_GOOGLE_SHEET = "macros/s/AKfycbzK8JugCcLRPwXWIevf_oVplm9UjAP6Ix99d-tOw2eld5xiwTr2cjn77Cj5rR72LRN1zg/exec";
 
     @GET
     @Headers("Accept: application/json")
