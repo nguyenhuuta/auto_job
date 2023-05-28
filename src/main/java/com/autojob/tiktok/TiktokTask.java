@@ -161,6 +161,7 @@ public class TiktokTask extends BaseWebViewTask {
             String[] array = randomThanks(hello, shopName);
             WebElement input = checkDoneById("chat-input-textarea");
             // check khách hàng có đang chat với shop không?
+            delaySecond(5);
             List<WebElement> listContent = getElementsByCssSelector("div.chatd-scrollView-content > div");
             if (listContent != null && listContent.size() > 3) {
                 WebElement orderId = getElementByClassName("lcYZDVix4GsvKJ9NZfOP");
