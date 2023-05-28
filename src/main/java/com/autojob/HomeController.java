@@ -11,6 +11,8 @@ import com.autojob.pane.HistoryListBox;
 import com.autojob.shopee.ShopeeController;
 import com.autojob.tiktok.TiktokController;
 import com.autojob.utils.Logger;
+import com.autojob.utils.TimeUtils;
+import com.autojob.utils.Utils;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -27,6 +29,7 @@ import javafx.util.Callback;
 import retrofit2.Call;
 import rx.Observable;
 import rx.Observer;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 import java.net.URL;
@@ -56,7 +59,6 @@ public class HomeController implements Initializable, WebDriverCallback {
         getAccounts();
     }
 
-
     void getAccounts() {
         Call<BaseResponse<List<AccountModel>>> call = ApiManager.GOOGLE_ENDPOINT.getAccountShopee(ApiManager.URL_GOOGLE_SHEET);
         RequestQueue.getInstance().enqueueRequest(call, new RequestQueue.IRequestCallback<List<AccountModel>>() {
@@ -75,7 +77,7 @@ public class HomeController implements Initializable, WebDriverCallback {
 
             @Override
             public void onFailure(String message) {
-                Logger.d("DKS", message);
+                Logger.d("GetAccounts Error", message);
             }
         });
     }

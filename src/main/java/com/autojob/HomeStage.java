@@ -14,6 +14,9 @@ public class HomeStage extends Stage {
     public HomeStage(Stage stage) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/fxml/home.fxml"));
+            root.prefHeight(400);
+            root.prefWidth(400);
+
             stage.setTitle("Home");
             stage.centerOnScreen();
             Scene scene = new Scene(root);

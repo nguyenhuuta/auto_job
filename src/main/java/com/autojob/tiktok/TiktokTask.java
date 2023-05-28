@@ -5,6 +5,7 @@ import com.autojob.model.entities.AccountModel;
 import com.autojob.task.BaseWebViewTask;
 import com.autojob.utils.Logger;
 import com.autojob.utils.TimeUtils;
+import com.autojob.utils.Utils;
 import com.oracle.tools.packager.Log;
 import javafx.scene.paint.Color;
 import org.openqa.selenium.Keys;
@@ -99,8 +100,6 @@ public class TiktokTask extends BaseWebViewTask {
                 if (shopNameElement != null) {
                     shopName = shopNameElement.getText();
                 }
-
-
                 while (index < size) {
                     boolean clickable;
                     String orderId = listOrderId.get(index).getText();
@@ -159,15 +158,23 @@ public class TiktokTask extends BaseWebViewTask {
             if (buyerName != null) {
                 hello += buyerName.toUpperCase() + ",";
             }
-            String[] array = new String[]{
-                    hello,
-                    "Cảm ơn bạn đã mua hàng tại cửa hàng của chúng tôi! Sự ủng hộ của bạn là động lực lớn để chúng tôi tiếp tục nỗ lực cung cấp những sản phẩm và dịch vụ tốt nhất cho khách hàng.",
-                    "Nếu bạn hài lòng với sản phẩm và dịch vụ của chúng tôi, xin vui lòng đánh giá 5* hoặc có bất kỳ câu hỏi hay ý kiến đóng góp nào, xin vui lòng liên hệ với chúng tôi. Chúng tôi luôn sẵn sàng hỗ trợ bạn.",
-                    "Xin lần nữa cảm ơn bạn rất nhiều!",
-                    "Trân trọng,",
-                    shopName.toUpperCase(),
-            };
+            String[] array = randomThanks(hello, shopName);
             WebElement input = checkDoneById("chat-input-textarea");
+            // check khách hàng có đang chat với shop không?
+            List<WebElement> listContent = getElementsByCssSelector("div.chatd-scrollView-content > div");
+            if (listContent != null && listContent.size() > 3) {
+                WebElement orderId = getElementByClassName("lcYZDVix4GsvKJ9NZfOP");
+                String _orderId = "NULL";
+                if (orderId != null) {
+                    _orderId = orderId.getText();
+                }
+                printColor("[SKIP]Khách hàng đang có cuộc trò chuyện với shop, bỏ qua đơn hàng " + _orderId, Color.BLUE);
+                webDriver.close();
+                webDriver.switchTo().window(tabs.get(0));
+                delaySecond(5);
+                return;
+            }
+            delaySecond(60);
             WebElement textArea = getElementByTagName(input, "textarea");
             delaySecond(2);
             for (String value : array) {
@@ -176,14 +183,47 @@ public class TiktokTask extends BaseWebViewTask {
                 delaySecond(1);
             }
             textArea.sendKeys(Keys.ENTER);
-            delay5to10s();
+            delaySecond(15);
             webDriver.close();
             webDriver.switchTo().window(tabs.get(0));
-            delaySecond(4);
+            delaySecond(45);
         } catch (Exception exception) {
             printException(exception);
             exception.printStackTrace();
         }
+    }
+
+    private String[] randomThanks(String buyer, String shopName) {
+        String[] thank1 = new String[]{
+                buyer,
+                "Cảm ơn bạn đã mua hàng tại cửa hàng của chúng tôi! Sự ủng hộ của bạn là động lực lớn để chúng tôi tiếp tục nỗ lực cung cấp những sản phẩm và dịch vụ tốt nhất cho khách hàng.",
+                "Nếu bạn hài lòng với sản phẩm và dịch vụ của chúng tôi, xin vui lòng đánh giá 5* hoặc có bất kỳ câu hỏi hay ý kiến đóng góp nào, xin vui lòng liên hệ với chúng tôi. Chúng tôi luôn sẵn sàng hỗ trợ bạn.",
+                "Xin lần nữa cảm ơn bạn rất nhiều!",
+                "Trân trọng,",
+                shopName.toUpperCase(),
+        };
+
+        String[] thank2 = new String[]{
+                "Chào bạn",
+                "Shop cảm ơn bạn v ì đã lựa chọn cửa hàng của chúng tôi và mua hàng tại đây.",
+                "Nếu bạn hài lòng với sản phẩm và dịch vụ của chúng tôi, xin vui lòng đánh giá 5* hoặc có bất kỳ câu hỏi hay ý kiến đóng góp nào, xin vui lòng liên hệ với chúng tôi. Chúng tôi luôn sẵn sàng hỗ trợ bạn.",
+                "Xin lần nữa cảm ơn bạn rất nhiều!",
+                "Trân trọng,",
+                shopName.toUpperCase(),
+        };
+        String[] thank3 = new String[]{
+                "Xin chân thành cảm ơn bạn đã lựa chọn cửa hàng của chúng tôi và mua hàng.",
+                "Nếu bạn hài lòng với dịch vụ của chúng tôi, xin vui lòng đánh giá 5* để giúp chúng tôi phục vụ tốt hơn.",
+                "Nếu có vấn đề gì bạn có thể chat với shop để shop hỗ trợ bạn nhé.",
+                "Một lần nữa cảm ơn sự ủng hộ của bạn và mong được gặp lại bạn trong những lần mua sắm tiếp theo!"
+        };
+
+        List<String[]> list = new ArrayList<>();
+        list.add(thank1);
+        list.add(thank2);
+        list.add(thank3);
+        int number = Utils.getRandomNumber(0, 2);
+        return list.get(number);
     }
 
     private boolean nextPage() {

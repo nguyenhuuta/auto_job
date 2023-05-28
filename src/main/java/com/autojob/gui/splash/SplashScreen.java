@@ -15,23 +15,25 @@ import javafx.scene.text.Text;
 
 public class SplashScreen extends BorderPane {
 
-    VBox maincontent;
+    VBox body;
     ProgressIndicator progressIndicator;
 
     public SplashScreen() {
+        prefHeight(400);
+        prefWidth(400);
         Text button = new Text("Tải Chrome...");
-        maincontent = new VBox();
+        body = new VBox();
         progressIndicator = new ProgressIndicator();
 
         progressIndicator.setMinWidth(50);
         progressIndicator.setMinHeight(50);
         progressIndicator.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
 
-        maincontent.setPadding(new Insets(80));
-        maincontent.setAlignment(Pos.CENTER);
-        maincontent.setSpacing(20);
-        maincontent.getChildren().addAll(progressIndicator, button);
-        setCenter(maincontent);
+        body.setPadding(new Insets(80));
+        body.setAlignment(Pos.CENTER);
+        body.setSpacing(20);
+        body.getChildren().addAll(progressIndicator, button);
+        setCenter(body);
 
         CheckChrome.startCheckChrome(() -> {
             Logger.info("startCheckChrome -> DONE");

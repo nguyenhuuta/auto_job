@@ -715,6 +715,11 @@ public abstract class BaseWebViewTask extends TimerTask implements IRegisterStop
         return status == RUNNING;
     }
 
+    public void printColor(String message, Color color) {
+        updateListView(message, color);
+        Logger.d(getTag(), message);
+    }
+
     public void print(String message) {
         updateListView(message);
         Logger.d(getTag(), message);

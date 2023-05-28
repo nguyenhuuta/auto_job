@@ -1,39 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<HBox xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.autojob.HomeController">
+<AnchorPane xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.autojob.HomeController">
     <children>
-        <VBox prefHeight="200.0" prefWidth="100.0">
+        <HBox AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"
+              AnchorPane.topAnchor="0.0">
             <children>
-                <Button mnemonicParsing="false" text="Chay Tiktok" onAction="#runTiktok"/>
-                <ListView VBox.vgrow="ALWAYS" fx:id="needLogin"/>
+                <VBox prefWidth="100">
+                    <children>
+                        <Button mnemonicParsing="false" onAction="#runTiktok" text="Chay Tiktok"/>
+                        <ListView fx:id="needLogin" VBox.vgrow="ALWAYS"/>
+                    </children>
+                </VBox>
+                <AnchorPane HBox.hgrow="ALWAYS">
+                    <children>
+                        <TabPane AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"
+                                 AnchorPane.topAnchor="0.0" fx:id="tabEcommerce" maxHeight="-Infinity"
+                                 maxWidth="-Infinity" minHeight="-Infinity"
+                                 minWidth="-Infinity" prefHeight="615.0" prefWidth="862.0"
+                                 tabClosingPolicy="UNAVAILABLE">
+                            <Tab text="TiktokShop">
+                                <content>
+                                    <VBox fx:id="containerTiktok" layoutX="67.0" layoutY="35.0" prefHeight="100.0"
+                                          prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                        <ListView fx:id="accountTiktok" VBox.vgrow="ALWAYS"/>
+                                        <HBox fx:id="actionTiktok" fillHeight="false" prefHeight="35.0"
+                                              spacing="20"
+                                              style="-fx-background-color: linear-gradient(to left, #FF7449, #4A0CAE)"
+                                              alignment="CENTER_LEFT"/>
+                                    </VBox>
+                                </content>
+                            </Tab>
+                            <Tab text="Shopee">
+                                <content>
+                                    <HBox fx:id="containerShopee" layoutX="67.0" layoutY="35.0" prefHeight="100.0"
+                                          prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+                                </content>
+                            </Tab>
+                        </TabPane>
+                    </children>
+                </AnchorPane>
             </children>
-        </VBox>
-        <TabPane fx:id="tabEcommerce" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-                 minWidth="-Infinity" prefHeight="615.0" prefWidth="862.0" tabClosingPolicy="UNAVAILABLE">
-
-            <Tab text="TiktokShop">
-                <content>
-                    <VBox fx:id="containerTiktok" layoutX="67.0" layoutY="35.0" prefHeight="100.0"
-                          prefWidth="200.0"
-                          AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                          AnchorPane.rightAnchor="0.0"
-                          AnchorPane.topAnchor="0.0">
-                        <ListView VBox.vgrow="ALWAYS" fx:id="accountTiktok"/>
-                        <HBox fx:id="actionTiktok"/>
-                    </VBox>
-                </content>
-            </Tab>
-            <Tab text="Shopee">
-                <content>
-                    <HBox fx:id="containerShopee" layoutX="67.0" layoutY="35.0" prefHeight="100.0" prefWidth="200.0"
-                          AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                          AnchorPane.topAnchor="0.0"/>
-                </content>
-            </Tab>
-        </TabPane>
+        </HBox>
     </children>
-</HBox>
+</AnchorPane>
