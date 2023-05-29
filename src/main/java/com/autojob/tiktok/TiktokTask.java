@@ -6,15 +6,11 @@ import com.autojob.task.BaseWebViewTask;
 import com.autojob.utils.Logger;
 import com.autojob.utils.TimeUtils;
 import com.autojob.utils.Utils;
-import com.oracle.tools.packager.Log;
 import javafx.scene.paint.Color;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 
 
 /**
@@ -23,7 +19,11 @@ import java.util.Objects;
 public class TiktokTask extends BaseWebViewTask {
     static final String ENDPOINT = "https://seller-vn.tiktok.com/";
     static final String URL_LOGIN = ENDPOINT + "account/login";
-    static final String ORDER_DELIVERED = ENDPOINT + "order?order_status[]=310&selected_sort=6&tab=shipped"; // selected_sort=6&tab=completed
+    private boolean isFirst = true;
+    static final String _ORDER_DELIVERED = ENDPOINT + "order?order_status[]=310&selected_sort=4&tab=shipped"; // selected_sort=6&tab=completed
+    String ORDER_DELIVERED;
+
+    int startDay = 0;
 
     public TiktokTask(AccountModel accountModel, WebDriverCallback callback) {
         super(accountModel, callback);
@@ -36,19 +36,42 @@ public class TiktokTask extends BaseWebViewTask {
 
 
     @Override
-    public synchronized void run() {
+    public void run() {
+        int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        System.out.println("DKS " + hour);
+        if (hour < 8 || hour > 22) {
+            updateListView("Ngoai giờ hoạt động 8h -> 22h");
+            return;
+        }
+        int start = TimeUtils.getStartOfDay();
+        if (startDay != start) {
+            int end = TimeUtils.getEndOfDay();
+            ORDER_DELIVERED = _ORDER_DELIVERED + String.format("&time_paid[]=%s&time_paid[]=%s", start, end);
+            startDay = start;
+        }
+
         if (status == RUNNING) {
             updateListView("JOB đang chay", Color.BLUEVIOLET);
             return;
         }
-        status = RUNNING;
-        checkLogin();
-        delaySecond(2);
-        loadOrderDelivered();
-        status = IDLE;
+        try {
+            status = RUNNING;
+            checkLogin();
+            loadOrderDelivered();
+        } catch (Exception exx) {
+            updateListView("CO LOI XAY RA " + exx);
+        } finally {
+            print("Status to IDLE");
+            status = IDLE;
+            isFirst = false;
+        }
+
     }
 
     private void checkLogin() {
+        if (!isFirst) {
+            return;
+        }
         load(URL_LOGIN);
         delaySecond(3);
         boolean needLogin = getElementById("sso_sdk") != null;
@@ -61,6 +84,8 @@ public class TiktokTask extends BaseWebViewTask {
                 System.out.println(getElementById("sso_sdk"));
                 needLogin = getElementById("sso_sdk") != null;
             } while (needLogin);
+            updateListView("60s để thao tác 1 lượt gửi tin nhắn để tắt các popup");
+            delaySecond(60);
         }
         webDriverCallback.triggerLogin(accountModel, false);
     }
@@ -151,7 +176,7 @@ public class TiktokTask extends BaseWebViewTask {
     private void sendChat(String buyerName, String shopName) {
         try {
             print("Send chat to " + buyerName);
-            delaySecond(3);
+            delaySecond(5);
             ArrayList<String> tabs = new ArrayList<>(webDriver.getWindowHandles());
             webDriver.switchTo().window(tabs.get(1));
             String hello = "Xin chào ";
@@ -175,19 +200,19 @@ public class TiktokTask extends BaseWebViewTask {
                 delaySecond(5);
                 return;
             }
-            delaySecond(60);
+            delaySecond(15);
             WebElement textArea = getElementByTagName(input, "textarea");
-            delaySecond(2);
             for (String value : array) {
                 textArea.sendKeys(value);
                 textArea.sendKeys(Keys.SHIFT, Keys.ENTER);
                 delaySecond(1);
             }
             textArea.sendKeys(Keys.ENTER);
-            delaySecond(15);
+            delayBetween(5, 10);
             webDriver.close();
             webDriver.switchTo().window(tabs.get(0));
-            delaySecond(45);
+            delayBetween(20, 30);
+            delay5to10s();
         } catch (Exception exception) {
             printException(exception);
             exception.printStackTrace();

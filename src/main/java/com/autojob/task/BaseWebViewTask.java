@@ -755,6 +755,18 @@ public abstract class BaseWebViewTask extends TimerTask implements IRegisterStop
         }
     }
 
+    // don vi second
+    public void delayBetween(int start, int end) {
+        try {
+            int number = Utils.randomInteger(start, end);
+            Logger.d(getTag(), "Đợi " + number + "s");
+            TimeUnit.SECONDS.sleep(number);
+        } catch (InterruptedException e) {
+            printE("delay5to10s " + e);
+            e.printStackTrace();
+        }
+    }
+
     public void delaySecond(long time) {
         try {
             TimeUnit.SECONDS.sleep(time);

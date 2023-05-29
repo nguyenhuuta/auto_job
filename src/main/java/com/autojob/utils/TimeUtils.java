@@ -103,4 +103,25 @@ public class TimeUtils {
         c.add(Calendar.MINUTE, min);
         return getStringFromDate(c.getTime(), formatDate1);
     }
+
+
+    public static int getStartOfDay() {
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DATE);
+        calendar.setTimeInMillis(0);
+        calendar.set(year, month, day, 0, 0, 0);
+        return Math.toIntExact(calendar.getTimeInMillis() / 1000);
+    }
+
+    public static int getEndOfDay() {
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DATE);
+        calendar.setTimeInMillis(0);
+        calendar.set(year, month, day, 23, 59, 59);
+        return Math.toIntExact(calendar.getTimeInMillis() / 1000);
+    }
 }
