@@ -747,7 +747,7 @@ public abstract class BaseWebViewTask extends TimerTask implements IRegisterStop
     public void delay5to10s() {
         try {
             int number = Utils.randomInteger(5, 10);
-            Logger.d(getTag(), "Đợi " + number + "s");
+            print("Đợi " + number + "s");
             TimeUnit.SECONDS.sleep(number);
         } catch (InterruptedException e) {
             printE("delay5to10s " + e);
@@ -759,7 +759,7 @@ public abstract class BaseWebViewTask extends TimerTask implements IRegisterStop
     public void delayBetween(int start, int end) {
         try {
             int number = Utils.randomInteger(start, end);
-            Logger.d(getTag(), "Đợi " + number + "s");
+            print("Đợi " + number + "s");
             TimeUnit.SECONDS.sleep(number);
         } catch (InterruptedException e) {
             printE("delay5to10s " + e);
@@ -769,6 +769,7 @@ public abstract class BaseWebViewTask extends TimerTask implements IRegisterStop
 
     public void delaySecond(long time) {
         try {
+            print("Đợi " + time + "s");
             TimeUnit.SECONDS.sleep(time);
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -832,6 +833,7 @@ public abstract class BaseWebViewTask extends TimerTask implements IRegisterStop
         }
         AccountBody body = new AccountBody(orderId, accountModel.rowId);
         try {
+            accountModel.lastOrderId = orderId;
             Call<BaseResponse<String>> call = ApiManager.GOOGLE_ENDPOINT.updateAccountShopee(ApiManager.URL_GOOGLE_SHEET, body);
             String message = RequestQueue.getInstance().executeRequest(call);
             String text = "Lưu " + orderId + " lên GoogleDriver " + message;

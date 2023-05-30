@@ -61,7 +61,6 @@ public class TiktokTask extends BaseWebViewTask {
         } catch (Exception exx) {
             updateListView("CO LOI XAY RA " + exx);
         } finally {
-            print("Status to IDLE");
             status = IDLE;
             isFirst = false;
         }
@@ -128,6 +127,8 @@ public class TiktokTask extends BaseWebViewTask {
                 while (index < size) {
                     boolean clickable;
                     String orderId = listOrderId.get(index).getText();
+                    String startOrder = String.format("--------- Đơn hàng %s ---------", orderId);
+                    print(startOrder);
                     if (Objects.equals(orderId, accountModel.lastOrderId)) {
                         String time = "ĐẾN LAST ORDER, lần chạy tiếp vào lúc: " + TimeUtils.addMinute(10);
                         if (newOrderId.isEmpty()) {
@@ -136,7 +137,6 @@ public class TiktokTask extends BaseWebViewTask {
                         }
                         updateAccountGoogleSheet(newOrderId);
                         printGreen(time);
-                        accountModel.lastOrderId = newOrderId;
                         return;
                     }
                     if (newOrderId.isEmpty()) {
@@ -157,6 +157,8 @@ public class TiktokTask extends BaseWebViewTask {
                         }
                     } while (!clickable);
                     sendChat(buyerName, shopName);
+                    String endOrder = String.format("---------Gửi xong %s ---------", orderId);
+                    print(endOrder);
                     index++;
                 }
                 scrollToBottom();
@@ -164,9 +166,10 @@ public class TiktokTask extends BaseWebViewTask {
                 isNextPage = nextPage();
                 if (!isNextPage) {
                     String time = "HẾT PAGE, lần chạy tiếp theo " + TimeUtils.addMinute(10);
-                    updateAccountGoogleSheet(newOrderId);
                     printGreen(time);
-                    accountModel.lastOrderId = newOrderId;
+                    if (newOrderId != null && newOrderId.isEmpty()) {
+                        updateAccountGoogleSheet(newOrderId);
+                    }
                 }
             } while (isNextPage);
 
@@ -178,32 +181,30 @@ public class TiktokTask extends BaseWebViewTask {
 
     private void sendChat(String buyerName, String shopName) {
         try {
-            print("Send chat to " + buyerName);
+            String hello = "Xin chào ";
+            if (buyerName != null) {
+                buyerName = buyerName.toUpperCase();
+                hello += buyerName + ",";
+                print("Send chat to " + buyerName);
+            }
+
             delaySecond(5);
             ArrayList<String> tabs = new ArrayList<>(webDriver.getWindowHandles());
             webDriver.switchTo().window(tabs.get(1));
-            String hello = "Xin chào ";
-            if (buyerName != null) {
-                hello += buyerName.toUpperCase() + ",";
-            }
+
             String[] array = randomThanks(hello, shopName);
             WebElement input = checkDoneById("chat-input-textarea");
             // check khách hàng có đang chat với shop không?
             delaySecond(5);
             List<WebElement> listContent = getElementsByCssSelector("div.chatd-scrollView-content > div");
             if (listContent != null && listContent.size() > 3) {
-                WebElement orderId = getElementByClassName("lcYZDVix4GsvKJ9NZfOP");
-                String _orderId = "NULL";
-                if (orderId != null) {
-                    _orderId = orderId.getText();
-                }
-                printColor("[SKIP]Khách hàng đang có cuộc trò chuyện với shop, bỏ qua đơn hàng " + _orderId, Color.BLUE);
+                printColor("[SKIP]Khách hàng đang có cuộc trò chuyện với shop, bỏ qua đơn hàng ", Color.BLUE);
                 webDriver.close();
                 webDriver.switchTo().window(tabs.get(0));
                 delaySecond(5);
                 return;
             }
-            delaySecond(15);
+            delaySecond(10);
             WebElement textArea = getElementByTagName(input, "textarea");
             for (String value : array) {
                 textArea.sendKeys(value);
@@ -215,7 +216,7 @@ public class TiktokTask extends BaseWebViewTask {
             webDriver.close();
             webDriver.switchTo().window(tabs.get(0));
             delayBetween(20, 30);
-            delay5to10s();
+            print("----------------------------");
         } catch (Exception exception) {
             printException(exception);
             exception.printStackTrace();
