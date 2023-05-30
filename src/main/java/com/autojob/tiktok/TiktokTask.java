@@ -163,7 +163,10 @@ public class TiktokTask extends BaseWebViewTask {
                 delaySecond(2);
                 isNextPage = nextPage();
                 if (!isNextPage) {
-                    printGreen("DONE, HẾT PAGE");
+                    String time = "HẾT PAGE, lần chạy tiếp theo " + TimeUtils.addMinute(10);
+                    updateAccountGoogleSheet(newOrderId);
+                    printGreen(time);
+                    accountModel.lastOrderId = newOrderId;
                 }
             } while (isNextPage);
 

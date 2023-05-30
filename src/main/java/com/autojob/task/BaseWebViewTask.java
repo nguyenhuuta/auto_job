@@ -826,6 +826,10 @@ public abstract class BaseWebViewTask extends TimerTask implements IRegisterStop
 
 
     public void updateAccountGoogleSheet(String orderId) {
+        if (orderId == null || orderId.isEmpty()) {
+            printE("UpdateAccountGoogleSheet error orderId is null or empty: " + orderId);
+            return;
+        }
         AccountBody body = new AccountBody(orderId, accountModel.rowId);
         try {
             Call<BaseResponse<String>> call = ApiManager.GOOGLE_ENDPOINT.updateAccountShopee(ApiManager.URL_GOOGLE_SHEET, body);
