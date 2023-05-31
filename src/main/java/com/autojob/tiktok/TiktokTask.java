@@ -167,7 +167,7 @@ public class TiktokTask extends BaseWebViewTask {
                 if (!isNextPage) {
                     String time = "HẾT PAGE, lần chạy tiếp theo " + TimeUtils.addMinute(10);
                     printGreen(time);
-                    if (newOrderId != null && newOrderId.isEmpty()) {
+                    if (newOrderId != null && !newOrderId.isEmpty()) {
                         updateAccountGoogleSheet(newOrderId);
                     }
                 }
