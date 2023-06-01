@@ -21,7 +21,7 @@ import java.util.Locale;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-public abstract class BaseWebViewTask extends TimerTask implements IRegisterStopApp {
+public abstract class BaseWebViewTask implements IRegisterStopApp {
     public static final int CAPTCHA = -1;
     public static final int IDLE = 0;
     public static final int RUNNING = 1;
@@ -50,6 +50,9 @@ public abstract class BaseWebViewTask extends TimerTask implements IRegisterStop
         App.getInstance().registerStopApp(this);
     }
 
+
+    public abstract void run();
+
     public void bringWebDriverToFront() {
         try {
             webDriver.switchTo().window(webDriver.getWindowHandle());
@@ -76,6 +79,11 @@ public abstract class BaseWebViewTask extends TimerTask implements IRegisterStop
         WebDriver webDriver = WebDriverUtils.getInstance().createWebDriver(chromeSetting);
         setWebDriver(webDriver);
         updateListView("Start CHROME");
+    }
+
+    public void setWebDriver(WebDriver webDriver) {
+        this.webDriver = webDriver;
+        webDriverWait = new WebDriverWait(webDriver, WEB_DRIVER_WAIT_TIMEOUT);
     }
 
     public void stopWeb() {
@@ -114,11 +122,6 @@ public abstract class BaseWebViewTask extends TimerTask implements IRegisterStop
         String time = TimeUtils.getCurrentDate(TimeUtils.formatDate1);
         String content = String.format("%s - [%s][%s] => %s", time, accountModel.shopName, jobName(), message);
         return new MessageListView(content, color);
-    }
-
-    public void setWebDriver(WebDriver webDriver) {
-        this.webDriver = webDriver;
-        webDriverWait = new WebDriverWait(webDriver, WEB_DRIVER_WAIT_TIMEOUT);
     }
 
     public void load(String url) {
@@ -447,9 +450,8 @@ public abstract class BaseWebViewTask extends TimerTask implements IRegisterStop
     }
 
     public WebElement getElementByXpath(String xpath) {
-        if (!isValidTaskInRunning()) return null;
         try {
-            return getWebDriver().findElement(By.xpath(xpath));
+            return webDriver.findElement(By.xpath(xpath));
         } catch (Exception e) {
             Logger.warning(getTag(), "Not found element : " + xpath);
             return null;
@@ -528,7 +530,6 @@ public abstract class BaseWebViewTask extends TimerTask implements IRegisterStop
     }
 
     protected final List<WebElement> getElementsByXpath(String xpath) {
-        if (!isValidTaskInRunning()) return null;
         try {
             return getWebDriver().findElements(By.xpath(xpath));
         } catch (Exception e) {
@@ -713,6 +714,10 @@ public abstract class BaseWebViewTask extends TimerTask implements IRegisterStop
 
     private boolean isValidTaskInRunning() {
         return status == RUNNING;
+    }
+
+    public void log(String message) {
+        Logger.d(getTag(), message);
     }
 
     public void printColor(String message, Color color) {

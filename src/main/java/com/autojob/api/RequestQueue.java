@@ -1,6 +1,7 @@
 package com.autojob.api;
 
 import com.autojob.model.entities.BaseResponse;
+import com.autojob.utils.Logger;
 import javafx.application.Platform;
 import okhttp3.Headers;
 import retrofit2.Call;
@@ -124,6 +125,7 @@ public final class RequestQueue {
             Response<BaseResponse<T>> response = request.execute();
             BaseResponse<T> responseData = response.body();
             if (responseData == null) {
+                Logger.d("ExecuteRequest", response.toString());
                 throw new InterruptedException("Response is NULL");
             }
             if (response.isSuccessful() && responseData.isSuccess) {

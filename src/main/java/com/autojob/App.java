@@ -1,5 +1,6 @@
 package com.autojob;
 
+import com.autojob.database.DatabaseHelper;
 import com.autojob.gui.splash.SplashScreen;
 import com.autojob.utils.IRegisterStopApp;
 import com.autojob.utils.Utils;
@@ -35,7 +36,7 @@ public class App extends Application {
     }
 
     static {
-//        DatabaseHelper.getInstance();
+        DatabaseHelper.getInstance();
     }
 
     public static void setupWebDriver() {

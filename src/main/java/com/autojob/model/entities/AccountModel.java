@@ -9,4 +9,5 @@ public class AccountModel {
     public String rowId;
     // 1: Shopee, 2: TiktokShop
     public int type;
+    public int shopId;
 }

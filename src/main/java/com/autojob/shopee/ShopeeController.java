@@ -34,13 +34,13 @@ public class ShopeeController extends BaseController {
 
     @Override
     public void runNow() {
-        executorService.scheduleWithFixedDelay(task, 0, 10, TimeUnit.MINUTES);
+//        executorService.scheduleWithFixedDelay(task, 0, 10, TimeUnit.MINUTES);
     }
 
     @Override
     public void changeJob(int jobId) {
         task.currentJob = jobId;
-        executorService.execute(task);
+//        executorService.execute(task);
     }
 
     @Override
