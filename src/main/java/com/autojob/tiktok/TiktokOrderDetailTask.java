@@ -7,16 +7,12 @@ import com.autojob.model.entities.AccountModel;
 import com.autojob.model.entities.BaseResponse;
 import com.autojob.model.entities.TiktokOrderRateBody;
 import com.autojob.task.BaseWebViewTask;
-import com.autojob.utils.Utils;
-import javafx.scene.paint.Color;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import retrofit2.Call;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -58,9 +54,16 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
     /**
      * Cập nhật SĐT, sendThanks vào đơn hàng
      */
-    public void updateOrder(List<TiktokOrderRateBody> body) throws InterruptedException {
-        Call<BaseResponse<Object>> call = ApiManager.BICA_ENDPOINT.updateBuyer(body);
-        RequestQueue.getInstance().executeRequest(call);
+    public void updateOrderToServer() {
+        try {
+            printGreen("Đang cập nhật lên server");
+            Call<BaseResponse<Object>> call = ApiManager.BICA_ENDPOINT.updateBuyer(jsonArray);
+            RequestQueue.getInstance().executeRequest(call);
+            printGreen("Cập nhật lên server thành công");
+            jsonArray.clear();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -89,7 +92,7 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
             try {
                 String orderId = orderIds.get(index);
                 String currentIndex = (index + 1) + "/" + size;
-                String format = String.format("============ %s. %s ============", currentIndex, orderId);
+                String format = String.format("============ %s| %s ============", currentIndex, orderId);
                 print(format);
                 String url = String.format(urlDetail, TiktokParentTask.ENDPOINT, orderId);
                 load(url);
@@ -99,6 +102,7 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
                         if (phone.isEmpty()) {
                             phone = "Không lấy được phone";
                         }
+                        print("SĐT " + phone);
                         TiktokOrderRateBody body = new TiktokOrderRateBody();
                         body.orderId = orderId;
                         body.buyerPhone = phone;
@@ -117,28 +121,24 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
                         break;
                 }
                 print("============ END ============");
+                if (jsonArray.size() == 30) {
+                    updateOrderToServer();
+                }
             } catch (Exception e) {
                 printE("OpenOrderDetail Lỗi " + e);
                 delaySecond(5);
             }
             index++;
         }
-        try {
-            updateOrder(jsonArray);
-            printGreen("Cập nhật lên server thành công");
-        } catch (InterruptedException e) {
-            printException(e);
-            e.printStackTrace();
-        }
-
+        updateOrderToServer();
     }
 
+
     private String getBuyerPhone() {
-        WebElement element = checkDoneBy(By.className("order-arco-icon-eyeInvisible"), "Eye show phone");
+        WebElement element = checkDoneBy(By.className("order-arco-icon-eyeInvisible"), "Icon Eye");
         if (element == null) {
             return "";
         }
-        print("Click Eye");
         element.click();
         delaySecond(3);
         element = getElementByClassName("order-arco-icon-eye");

@@ -832,20 +832,20 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     }
 
 
-    public void updateAccountGoogleSheet(String orderId) {
-        if (orderId == null || orderId.isEmpty()) {
-            printE("UpdateAccountGoogleSheet error orderId is null or empty: " + orderId);
-            return;
-        }
-        AccountBody body = new AccountBody(orderId, accountModel.rowId);
-        try {
-            accountModel.lastOrderId = orderId;
-            Call<BaseResponse<String>> call = ApiManager.GOOGLE_ENDPOINT.updateAccountShopee(ApiManager.URL_GOOGLE_SHEET, body);
-            String message = RequestQueue.getInstance().executeRequest(call);
-            String text = "Lưu " + orderId + " lên GoogleDriver " + message;
-            updateListView(text.toUpperCase(), Color.ORANGERED);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
+//    public void updateAccountGoogleSheet(String orderId) {
+//        if (orderId == null || orderId.isEmpty()) {
+//            printE("UpdateAccountGoogleSheet error orderId is null or empty: " + orderId);
+//            return;
+//        }
+//        AccountBody body = new AccountBody(orderId, accountModel.rowId);
+//        try {
+//            accountModel.lastOrderId = orderId;
+//            Call<BaseResponse<String>> call = ApiManager.GOOGLE_ENDPOINT.updateAccountShopee(ApiManager.URL_GOOGLE_SHEET, body);
+//            String message = RequestQueue.getInstance().executeRequest(call);
+//            String text = "Lưu " + orderId + " lên GoogleDriver " + message;
+//            updateListView(text.toUpperCase(), Color.ORANGERED);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//    }
 }
