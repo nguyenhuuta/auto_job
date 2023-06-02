@@ -6,6 +6,7 @@ import com.autojob.model.entities.AccountBody;
 import com.autojob.model.entities.AccountModel;
 import com.autojob.model.entities.BaseResponse;
 import com.autojob.task.BaseWebViewTask;
+import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import retrofit2.Call;
@@ -189,7 +190,7 @@ public class ShopeeTask extends BaseWebViewTask {
                     } while (!clickable);
                     ArrayList<String> tabs = new ArrayList<>(webDriver.getWindowHandles());
                     webDriver.switchTo().window(tabs.get(1));
-                    WebElement miniChat = checkDoneByClass("mini-chat");
+                    WebElement miniChat = checkDoneBy(By.className("mini-chat"), "Mini Chat");
                     // Đánh giá người mua
                     WebElement btns = getElementByClassName("btns");
                     if (btns != null) {
@@ -234,7 +235,7 @@ public class ShopeeTask extends BaseWebViewTask {
 
     private boolean shopeeMiniChatEmbedded() {
         try {
-            WebElement messageSection = checkDoneById("messageSection"); // đợi hiển thị lịch sử chat
+            WebElement messageSection = checkDoneBy(By.id("messageSection"), "Lịch sử chat"); // đợi hiển thị lịch sử chat
             WebElement miniChatEmbedded = getElementById("shopee-mini-chat-embedded");
             WebElement element = getElementByClassName("username");
             String hello = "Xin chào ";

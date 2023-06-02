@@ -132,7 +132,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     public void waitLoadDone() {
         webDriverWait.until((ExpectedCondition<Boolean>) wd ->
                 ((JavascriptExecutor) wd).executeScript("return document.readyState").equals("complete"));
-        print("LOAD DONE " + webDriver.getCurrentUrl());
+        print("Mở trang: " + webDriver.getCurrentUrl());
     }
 
     protected WebDriver getWebDriver() {
@@ -774,7 +774,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
 
     public void delaySecond(long time) {
         try {
-            print("Đợi " + time + "s");
+//            print("Đợi " + time + "s");
             TimeUnit.SECONDS.sleep(time);
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -810,23 +810,24 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         } while (!clickable);
     }
 
-    public WebElement checkDoneById(String key) {
-        WebElement element;
-        do {
-            delaySecond(2);
-            element = getElementById(key);
-        } while (element == null);
-        print("Key [" + key + "] load done");
-        return element;
-    }
 
-    public WebElement checkDoneByClass(String key) {
+    public WebElement checkDoneBy(By by, String tag) {
         WebElement element;
+        int count = 1;
         do {
+            if (count == 5) {
+                printE(tag + " Hết số lần thử");
+                return null;
+            }
             delaySecond(2);
-            element = getElementByClassName(key);
+            try {
+                element = webDriver.findElement(by);
+            } catch (Exception ignore) {
+                element = null;
+            }
+            count++;
         } while (element == null);
-        print("Key [" + key + "] load done");
+        print(tag + " load done");
         return element;
     }
 

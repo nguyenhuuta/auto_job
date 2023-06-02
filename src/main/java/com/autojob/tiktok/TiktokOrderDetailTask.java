@@ -15,6 +15,8 @@ import org.openqa.selenium.WebElement;
 import retrofit2.Call;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -71,7 +73,7 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
                 updateListView("List đơn hàng trống");
                 return;
             }
-            log("OrderIds " + orderIds);
+            log("OrderIds " + jobName() + " " + orderIds);
             openOrderDetail();
         } catch (Exception e) {
             printException(e);
@@ -84,40 +86,46 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
         int size = orderIds.size();
         int index = 0;
         while (index < size) {
-            String orderId = "577344802301184671";//orderIds.get(index);
-            print("============ Đơn hàng " + orderId + "============");
-            String url = String.format(urlDetail, TiktokParentTask.ENDPOINT, orderId);
-            load(url);
-            delaySecond(5);
-
-            switch (type) {
-                case 1:
-                    String phone = getBuyerPhone(1);
-                    if (phone.isEmpty()) {
-                        phone = "Không lấy được phone";
-                    }
-                    TiktokOrderRateBody body = new TiktokOrderRateBody();
-                    body.orderId = orderId;
-                    body.buyerPhone = phone;
-                    jsonArray.add(body);
-                    break;
-                case 2:
-                    List<WebElement> elements = getElementsByXpath("//div[contains(text(),'Tên')]"); //Tên
-                    if (elements != null) {
-                        for (WebElement element : elements) {
-                            System.out.println(element.getText());
+            try {
+                String orderId = orderIds.get(index);
+                String currentIndex = (index + 1) + "/" + size;
+                String format = String.format("============ %s. %s ============", currentIndex, orderId);
+                print(format);
+                String url = String.format(urlDetail, TiktokParentTask.ENDPOINT, orderId);
+                load(url);
+                switch (type) {
+                    case 1: // Lấy SĐT
+                        String phone = getBuyerPhone();
+                        if (phone.isEmpty()) {
+                            phone = "Không lấy được phone";
                         }
-                    } else {
-                        printE("Lấy tên buyer thất bại");
-                    }
-                    break;
+                        TiktokOrderRateBody body = new TiktokOrderRateBody();
+                        body.orderId = orderId;
+                        body.buyerPhone = phone;
+                        jsonArray.add(body);
+                        break;
+                    case 2:// Gửi cảm ơn
+                        WebElement chatIcon = checkDoneBy(By.xpath("//div[contains(@class, 'IMICon__IMIconBackground')]"), "Icon Chat");
+                        TiktokOrderRateBody bodyThanks = new TiktokOrderRateBody();
+                        if (chatIcon != null) {
+                            chatIcon.click();
+                            sendChat();
+                        }
+                        bodyThanks.orderId = orderId;
+                        bodyThanks.sendThanks = true;
+                        jsonArray.add(bodyThanks);
+                        break;
+                }
+                print("============ END ============");
+            } catch (Exception e) {
+                printE("OpenOrderDetail Lỗi " + e);
+                delaySecond(5);
             }
-            print("============ Đơn hàng " + orderId + "============");
             index++;
         }
         try {
             updateOrder(jsonArray);
-            printGreen("Cập nhật SĐT thành công lên server");
+            printGreen("Cập nhật lên server thành công");
         } catch (InterruptedException e) {
             printException(e);
             e.printStackTrace();
@@ -125,15 +133,9 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
 
     }
 
-    private String getBuyerPhone(int count) {
-        if (count == 5) {
-            printE("Không tìm thấy sđt người mua");
-            return "";
-        }
-        WebElement element = getElementByClassName("order-arco-icon-eyeInvisible");
+    private String getBuyerPhone() {
+        WebElement element = checkDoneBy(By.className("order-arco-icon-eyeInvisible"), "Eye show phone");
         if (element == null) {
-            delaySecond(2);
-            getBuyerPhone(count + 1);
             return "";
         }
         print("Click Eye");
@@ -149,80 +151,43 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
     }
 
 
-    private void sendChat(String buyerName, String shopName) {
+    private void sendChat() {
         try {
-            String hello = "Xin chào ";
-            if (buyerName != null) {
-                buyerName = buyerName.toUpperCase();
-                hello += buyerName + ",";
-                print("Send chat to " + buyerName);
-            }
-
             delaySecond(5);
             ArrayList<String> tabs = new ArrayList<>(webDriver.getWindowHandles());
             webDriver.switchTo().window(tabs.get(1));
-
-            String[] array = randomThanks(hello, shopName);
-            WebElement input = checkDoneById("chat-input-textarea");
-            // check khách hàng có đang chat với shop không?
-            delaySecond(5);
-            List<WebElement> listContent = getElementsByCssSelector("div.chatd-scrollView-content > div");
-            if (listContent != null && listContent.size() > 3) {
-                printColor("[SKIP]Khách hàng đang có cuộc trò chuyện với shop, bỏ qua đơn hàng ", Color.BLUE);
-                webDriver.close();
-                webDriver.switchTo().window(tabs.get(0));
-                delaySecond(5);
+            String[] array = new String[]{
+                    "Shop thấy bạn đã nhận hàng",
+                    "Không biết sản phẩm bên mình bạn có hài lòng không ạ?",
+                    "Hàng bên mình được đổi trả trong 3 ngày.",
+                    "Nếu bạn hài lòng hãy ĐÁNH GIÁ cho shop 5* nhé ^^.",
+                    "ĐỪNG VỘI ĐÁNH GIÁ XẤU nếu sản phẩm có vấn đề, hãy nhắn tin hoặc liên hệ: 0342.092.686 để shop xử lý ngay ạ."
+            };
+            WebElement textArea = checkDoneBy(By.xpath("//*[@id='chat-input-textarea']/textarea"), "ChatInput");
+            if (textArea == null) {
                 return;
             }
-            delaySecond(10);
-            WebElement textArea = getElementByTagName(input, "textarea");
+//          Check khách hàng có đang chat với shop không?
+//            delaySecond(5);
+//            List<WebElement> listContent = getElementsByXpath("//div[@class='chatd-scrollView-content']/div");
+//            System.out.println(listContent);
+//            if (listContent != null && listContent.size() > 3) {
+//                printColor("[SKIP]Khách hàng đang có cuộc trò chuyện với shop, bỏ qua đơn hàng ", Color.BLUE);
+//            } else {
             for (String value : array) {
                 textArea.sendKeys(value);
                 textArea.sendKeys(Keys.SHIFT, Keys.ENTER);
-                delaySecond(1);
             }
             textArea.sendKeys(Keys.ENTER);
+            print("Gửi chat thành công");
             delayBetween(5, 10);
             webDriver.close();
             webDriver.switchTo().window(tabs.get(0));
-            delayBetween(20, 30);
-            print("----------------------------");
+            print("Tắt chat");
+            delayBetween(10, 20);
         } catch (Exception exception) {
             printException(exception);
             exception.printStackTrace();
         }
-    }
-
-    private String[] randomThanks(String buyer, String shopName) {
-        String[] thank1 = new String[]{
-                buyer,
-                "Cảm ơn bạn đã mua hàng tại cửa hàng của chúng tôi! Sự ủng hộ của bạn là động lực lớn để chúng tôi tiếp tục nỗ lực cung cấp những sản phẩm và dịch vụ tốt nhất cho khách hàng.",
-                "Nếu bạn hài lòng với sản phẩm và dịch vụ của chúng tôi, xin vui lòng đánh giá 5* hoặc có bất kỳ câu hỏi hay ý kiến đóng góp nào, xin vui lòng liên hệ với chúng tôi. Chúng tôi luôn sẵn sàng hỗ trợ bạn.",
-                "Xin lần nữa cảm ơn bạn rất nhiều!",
-                "Trân trọng,",
-                shopName.toUpperCase(),
-        };
-
-        String[] thank2 = new String[]{
-                "Chào bạn",
-                "Shop cảm ơn bạn v ì đã lựa chọn cửa hàng của chúng tôi và mua hàng tại đây.",
-                "Nếu bạn hài lòng với sản phẩm và dịch vụ của chúng tôi, xin vui lòng đánh giá 5* hoặc có bất kỳ câu hỏi hay ý kiến đóng góp nào, xin vui lòng liên hệ với chúng tôi. Chúng tôi luôn sẵn sàng hỗ trợ bạn.",
-                "Xin lần nữa cảm ơn bạn rất nhiều!",
-                "Trân trọng,",
-                shopName.toUpperCase(),
-        };
-        String[] thank3 = new String[]{
-                "Xin chân thành cảm ơn bạn đã lựa chọn cửa hàng của chúng tôi và mua hàng.",
-                "Nếu bạn hài lòng với dịch vụ của chúng tôi, xin vui lòng đánh giá 5* để giúp chúng tôi phục vụ tốt hơn.",
-                "Nếu có vấn đề gì bạn có thể chat với shop để shop hỗ trợ bạn nhé.",
-                "Một lần nữa cảm ơn sự ủng hộ của bạn và mong được gặp lại bạn trong những lần mua sắm tiếp theo!"
-        };
-
-        List<String[]> list = new ArrayList<>();
-        list.add(thank1);
-        list.add(thank2);
-        list.add(thank3);
-        int number = Utils.getRandomNumber(0, 2);
-        return list.get(number);
     }
 }

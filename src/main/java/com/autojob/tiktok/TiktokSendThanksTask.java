@@ -144,49 +144,49 @@ class TiktokSendThanksTask extends BaseWebViewTask {
 //        }
 //    }
 
-    private void sendChat(String buyerName, String shopName) {
-        try {
-            String hello = "Xin chào ";
-            if (buyerName != null) {
-                buyerName = buyerName.toUpperCase();
-                hello += buyerName + ",";
-                print("Send chat to " + buyerName);
-            }
-
-            delaySecond(5);
-            ArrayList<String> tabs = new ArrayList<>(webDriver.getWindowHandles());
-            webDriver.switchTo().window(tabs.get(1));
-
-            String[] array = randomThanks(hello, shopName);
-            WebElement input = checkDoneById("chat-input-textarea");
-            // check khách hàng có đang chat với shop không?
-            delaySecond(5);
-            List<WebElement> listContent = getElementsByCssSelector("div.chatd-scrollView-content > div");
-            if (listContent != null && listContent.size() > 3) {
-                printColor("[SKIP]Khách hàng đang có cuộc trò chuyện với shop, bỏ qua đơn hàng ", Color.BLUE);
-                webDriver.close();
-                webDriver.switchTo().window(tabs.get(0));
-                delaySecond(5);
-                return;
-            }
-            delaySecond(10);
-            WebElement textArea = getElementByTagName(input, "textarea");
-            for (String value : array) {
-                textArea.sendKeys(value);
-                textArea.sendKeys(Keys.SHIFT, Keys.ENTER);
-                delaySecond(1);
-            }
-            textArea.sendKeys(Keys.ENTER);
-            delayBetween(5, 10);
-            webDriver.close();
-            webDriver.switchTo().window(tabs.get(0));
-            delayBetween(20, 30);
-            print("----------------------------");
-        } catch (Exception exception) {
-            printException(exception);
-            exception.printStackTrace();
-        }
-    }
+//    private void sendChat(String buyerName, String shopName) {
+//        try {
+//            String hello = "Xin chào ";
+//            if (buyerName != null) {
+//                buyerName = buyerName.toUpperCase();
+//                hello += buyerName + ",";
+//                print("Send chat to " + buyerName);
+//            }
+//
+//            delaySecond(5);
+//            ArrayList<String> tabs = new ArrayList<>(webDriver.getWindowHandles());
+//            webDriver.switchTo().window(tabs.get(1));
+//
+//            String[] array = randomThanks(hello, shopName);
+//            WebElement input = checkDoneById("chat-input-textarea");
+//            // check khách hàng có đang chat với shop không?
+//            delaySecond(5);
+//            List<WebElement> listContent = getElementsByCssSelector("div.chatd-scrollView-content > div");
+//            if (listContent != null && listContent.size() > 3) {
+//                printColor("[SKIP]Khách hàng đang có cuộc trò chuyện với shop, bỏ qua đơn hàng ", Color.BLUE);
+//                webDriver.close();
+//                webDriver.switchTo().window(tabs.get(0));
+//                delaySecond(5);
+//                return;
+//            }
+//            delaySecond(10);
+//            WebElement textArea = getElementByTagName(input, "textarea");
+//            for (String value : array) {
+//                textArea.sendKeys(value);
+//                textArea.sendKeys(Keys.SHIFT, Keys.ENTER);
+//                delaySecond(1);
+//            }
+//            textArea.sendKeys(Keys.ENTER);
+//            delayBetween(5, 10);
+//            webDriver.close();
+//            webDriver.switchTo().window(tabs.get(0));
+//            delayBetween(20, 30);
+//            print("----------------------------");
+//        } catch (Exception exception) {
+//            printException(exception);
+//            exception.printStackTrace();
+//        }
+//    }
 
     private String[] randomThanks(String buyer, String shopName) {
         String[] thank1 = new String[]{

@@ -67,27 +67,26 @@ public class TiktokParentTask extends TimerTask {
                 updateListView("Ngoài giờ hoạt động 8h -> 22h");
                 return;
             }
+            if (getPhoneTask == null) {
+                getPhoneTask = new TiktokOrderDetailTask(accountModel, webDriverCallback, 1);
+                getPhoneTask.webDriver = webDriver;
+                getPhoneTask.webDriverWait = webDriverWait;
+            }
+            getPhoneTask.run();
             if (sendThanksTask == null) {
                 sendThanksTask = new TiktokOrderDetailTask(accountModel, webDriverCallback, 2);
                 sendThanksTask.webDriver = webDriver;
                 sendThanksTask.webDriverWait = webDriverWait;
             }
             sendThanksTask.run();
-//            if (getPhoneTask == null) {
-//                getPhoneTask = new TiktokOrderDetailTask(accountModel, webDriverCallback, 2);
-//                getPhoneTask.webDriver = webDriver;
-//                getPhoneTask.webDriverWait = webDriverWait;
-//            }
-//            getPhoneTask.run();
         } catch (Exception e) {
             Logger.error(e.toString());
             updateListView(e.toString());
             e.printStackTrace();
         } finally {
-            updateListView("DONE");
+            String text = "Lần chạy tới vào lúc " + TimeUtils.addMinute(10);
+            updateListView("DONE - " + text);
         }
-
-
     }
 
     public void delaySecond(long time) {
