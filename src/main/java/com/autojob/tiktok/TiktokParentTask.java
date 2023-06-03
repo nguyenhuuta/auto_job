@@ -68,17 +68,11 @@ public class TiktokParentTask extends TimerTask {
                 return;
             }
             if (getPhoneTask == null) {
-                getPhoneTask = new TiktokOrderDetailTask(accountModel, webDriverCallback, 1);
+                getPhoneTask = new TiktokOrderDetailTask(accountModel, webDriverCallback);
                 getPhoneTask.webDriver = webDriver;
                 getPhoneTask.webDriverWait = webDriverWait;
             }
             getPhoneTask.run();
-            if (sendThanksTask == null) {
-                sendThanksTask = new TiktokOrderDetailTask(accountModel, webDriverCallback, 2);
-                sendThanksTask.webDriver = webDriver;
-                sendThanksTask.webDriverWait = webDriverWait;
-            }
-            sendThanksTask.run();
         } catch (Exception e) {
             Logger.error(e.toString());
             updateListView(e.toString());

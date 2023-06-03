@@ -38,7 +38,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     public WebDriverWait webDriverWait;
 
     public String getTag() {
-        return accountModel.shopName;
+        return String.format("[%s][%s]", accountModel.shopName, jobName());
     }
 
     public AccountModel accountModel;
@@ -549,7 +549,6 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     }
 
     protected final WebElement getElementByName(String name) {
-        if (!isValidTaskInRunning()) return null;
         try {
             return getWebDriver().findElement(By.name(name));
         } catch (Exception e) {
@@ -559,7 +558,6 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     }
 
     protected final WebElement getElementByName(WebElement parentElement, String name) {
-        if (!isValidTaskInRunning()) return null;
         try {
             return parentElement.findElement(By.name(name));
         } catch (Exception e) {
@@ -569,7 +567,6 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     }
 
     protected final List<WebElement> getElementsByName(String name) {
-        if (!isValidTaskInRunning()) return null;
         try {
             return getWebDriver().findElements(By.name(name));
         } catch (Exception e) {
@@ -579,7 +576,6 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     }
 
     protected final List<WebElement> getElementsByName(WebElement parent, String name) {
-        if (!isValidTaskInRunning()) return null;
         try {
             return parent.findElements(By.name(name));
         } catch (Exception e) {
@@ -589,7 +585,6 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     }
 
     protected final WebElement getElementByTagName(String name) {
-        if (!isValidTaskInRunning()) return null;
         try {
             return getWebDriver().findElement(By.tagName(name));
         } catch (Exception e) {
@@ -599,7 +594,6 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     }
 
     public WebElement getElementByTagName(WebElement parentElement, String name) {
-        if (!isValidTaskInRunning()) return null;
         try {
             return parentElement.findElement(By.tagName(name));
         } catch (Exception e) {
@@ -609,7 +603,6 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     }
 
     public List<WebElement> getElementsByTagName(WebElement parentElement, String name) {
-        if (!isValidTaskInRunning()) return null;
         try {
             return parentElement.findElements(By.tagName(name));
         } catch (Exception e) {

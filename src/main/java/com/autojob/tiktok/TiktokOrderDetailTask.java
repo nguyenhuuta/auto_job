@@ -13,6 +13,7 @@ import org.openqa.selenium.WebElement;
 import retrofit2.Call;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -20,12 +21,16 @@ import java.util.List;
  */
 class TiktokOrderDetailTask extends BaseWebViewTask {
     final String urlDetail = "%sorder/detail?order_no=%s&shop_region=VN";
-    int type;
+    /**
+     * 1: Lấy SĐT
+     * 2: Gửi lời cảm ơn đơn hàng
+     * 3: Trả lời đánh giá khách hàng
+     */
+    private int type = 1;
     List<TiktokOrderRateBody> jsonArray = new ArrayList<>();
 
-    public TiktokOrderDetailTask(AccountModel accountModel, WebDriverCallback webDriverCallback, int type) {
+    public TiktokOrderDetailTask(AccountModel accountModel, WebDriverCallback webDriverCallback) {
         super(accountModel, webDriverCallback);
-        this.type = type;
     }
 
     private List<String> orderIds = new ArrayList<>();
@@ -55,6 +60,9 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
      * Cập nhật SĐT, sendThanks vào đơn hàng
      */
     public void updateOrderToServer() {
+        if (jsonArray.isEmpty()) {
+            return;
+        }
         try {
             printGreen("Đang cập nhật lên server");
             Call<BaseResponse<Object>> call = ApiManager.BICA_ENDPOINT.updateBuyer(jsonArray);
@@ -69,20 +77,22 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
 
     @Override
     public void run() {
-        try {
-            delaySecond(3);
-            orderIds = orderStringByType();
-            if (orderIds.isEmpty()) {
-                updateListView("List đơn hàng trống");
-                return;
+        while (type <= 2) {
+            try {
+                delaySecond(3);
+                orderIds = orderStringByType();
+                if (orderIds.isEmpty()) {
+                    updateListView("List đơn hàng trống");
+                    return;
+                }
+                log("OrderIds " + jobName() + " " + orderIds);
+                openOrderDetail();
+            } catch (Exception e) {
+                printException(e);
+            } finally {
+                type++;
             }
-            log("OrderIds " + jobName() + " " + orderIds);
-            openOrderDetail();
-        } catch (Exception e) {
-            printException(e);
-            e.printStackTrace();
         }
-
     }
 
     void openOrderDetail() {
@@ -96,6 +106,28 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
                 print(format);
                 String url = String.format(urlDetail, TiktokParentTask.ENDPOINT, orderId);
                 load(url);
+                WebElement chatIcon = checkDoneBy(By.xpath("//div[contains(@class, 'IMICon__IMIconBackground')]"), "Icon Chat");
+                delaySecond(2);
+                if (chatIcon == null) {
+                    printE("Không thể thấy IconChat");
+                    return;
+                }
+                // check có hiển thị popup trả lời tin nhắn ngay không
+                WebElement popup = getElementByClassName("arco-popover-content");
+                if (popup != null) {
+                    print("Hiển thị popup trả lời tin nhắn");
+                    try {
+                        List<WebElement> actions = getElementsByTagName(popup, "button");
+                        if (actions != null && actions.size() == 2) {
+                            actions.get(0).click();
+                        } else {
+                        }
+                        print("Click button: Có lẽ để sau");
+                    } catch (Exception e) {
+                        printE("Click button 'Có lẽ để sau' lỗi " + e);
+                        executeScript("document.getElementsByClassName('zoomInFadeOut-enter-done')[0].style.display = 'none'");
+                    }
+                }
                 switch (type) {
                     case 1: // Lấy SĐT
                         String phone = getBuyerPhone();
@@ -109,12 +141,9 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
                         jsonArray.add(body);
                         break;
                     case 2:// Gửi cảm ơn
-                        WebElement chatIcon = checkDoneBy(By.xpath("//div[contains(@class, 'IMICon__IMIconBackground')]"), "Icon Chat");
+                        chatIcon.click();
                         TiktokOrderRateBody bodyThanks = new TiktokOrderRateBody();
-                        if (chatIcon != null) {
-                            chatIcon.click();
-                            sendChat();
-                        }
+                        sendChat();
                         bodyThanks.orderId = orderId;
                         bodyThanks.sendThanks = true;
                         jsonArray.add(bodyThanks);
