@@ -131,7 +131,7 @@ public final class RequestQueue {
             if (response.isSuccessful() && responseData.isSuccess) {
                 return responseData.getData();
             } else {
-                throw new InterruptedException("Có lỗi xảy ra");
+                throw new InterruptedException("Có lỗi xảy ra " + response);
             }
         } catch (IOException e) {
             throw new InterruptedException(e.toString());

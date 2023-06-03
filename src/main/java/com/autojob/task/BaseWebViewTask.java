@@ -120,7 +120,12 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
 
     private MessageListView formatMessage(String message, Color color) {
         String time = TimeUtils.getCurrentDate(TimeUtils.formatDate1);
-        String content = String.format("%s - [%s][%s] => %s", time, accountModel.shopName, jobName(), message);
+        String content;
+        if (jobName().isEmpty()) {
+            content = String.format("%s - [%s] => %s", time, accountModel.shopName, message);
+        } else {
+            content = String.format("%s - [%s][%s] => %s", time, accountModel.shopName, jobName(), message);
+        }
         return new MessageListView(content, color);
     }
 
@@ -804,13 +809,12 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     }
 
 
-    public WebElement checkDoneBy(By by, String tag) {
+    public WebElement checkDoneBy(By by, String tag) throws InterruptedException {
         WebElement element;
         int count = 1;
         do {
             if (count == 5) {
-                printE(tag + " Hết số lần thử");
-                return null;
+                throw new InterruptedException(tag + " Hết số lần thử");
             }
             delaySecond(2);
             try {

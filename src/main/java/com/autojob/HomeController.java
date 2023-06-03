@@ -163,7 +163,7 @@ public class HomeController implements Initializable, WebDriverCallback {
                             BaseController controller = new TiktokController(account, HomeController.this);
                             controller.runNow();
                             controllers.put(account.shopName, controller);
-                            Button button = new Button("Login " + account.shopName);
+                            Button button = new Button(account.shopName);
                             button.setUserData(account.shopName);
                             button.setOnAction(event -> controllers.get(account.shopName).bringDriverToFront());
                             buttonMapChrome.put(account.rowId, button);

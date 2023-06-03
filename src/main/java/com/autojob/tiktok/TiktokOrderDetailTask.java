@@ -7,6 +7,10 @@ import com.autojob.model.entities.AccountModel;
 import com.autojob.model.entities.BaseResponse;
 import com.autojob.model.entities.TiktokOrderRateBody;
 import com.autojob.task.BaseWebViewTask;
+import com.autojob.utils.TimeUtils;
+import javafx.scene.paint.Color;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
@@ -22,11 +26,12 @@ import java.util.List;
 class TiktokOrderDetailTask extends BaseWebViewTask {
     final String urlDetail = "%sorder/detail?order_no=%s&shop_region=VN";
     /**
+     * 0: Trạng thái bắt đầu
      * 1: Lấy SĐT
      * 2: Gửi lời cảm ơn đơn hàng
      * 3: Trả lời đánh giá khách hàng
      */
-    private int type = 1;
+    private int type = 0;
     List<TiktokOrderRateBody> jsonArray = new ArrayList<>();
 
     public TiktokOrderDetailTask(AccountModel accountModel, WebDriverCallback webDriverCallback) {
@@ -39,8 +44,11 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
     public String jobName() {
         if (type == 1) {
             return "LẤY SĐT";
+        } else if (type == 2) {
+            return "GỬI CẢM ƠN";
         }
-        return "GỬI CẢM ƠN";
+        return "";
+
     }
 
     /**
@@ -52,6 +60,7 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
      * @return
      */
     List<String> orderStringByType() throws InterruptedException {
+        print("OrderByType " + accountModel.shopId + "/" + type);
         Call<BaseResponse<List<String>>> call = ApiManager.BICA_ENDPOINT.orderNeedBuyerPhone(accountModel.shopId, type);
         return RequestQueue.getInstance().executeRequest(call);
     }
@@ -63,6 +72,7 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
         if (jsonArray.isEmpty()) {
             return;
         }
+        log("Data gửi lên server " + jsonArray);
         try {
             printGreen("Đang cập nhật lên server");
             Call<BaseResponse<Object>> call = ApiManager.BICA_ENDPOINT.updateBuyer(jsonArray);
@@ -77,20 +87,25 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
 
     @Override
     public void run() {
-        while (type <= 2) {
-            try {
-                delaySecond(3);
-                orderIds = orderStringByType();
-                if (orderIds.isEmpty()) {
-                    updateListView("List đơn hàng trống");
-                    return;
-                }
-                log("OrderIds " + jobName() + " " + orderIds);
-                openOrderDetail();
-            } catch (Exception e) {
-                printException(e);
-            } finally {
-                type++;
+        try {
+            type++;
+            delaySecond(3);
+            orderIds = orderStringByType();
+            print("List đơn hàng: " + orderIds.size());
+            if (orderIds.isEmpty()) {
+                return;
+            }
+            openOrderDetail();
+        } catch (Exception e) {
+            printException(e);
+        } finally {
+            print("HOÀN THÀNH");
+            if (type < 2) {
+                run();
+            } else {
+                type = 0;
+                String text = "LẦN CHẠY TỚI VÀO: " + TimeUtils.addMinute(10);
+                print(text);
             }
         }
     }
@@ -108,10 +123,6 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
                 load(url);
                 WebElement chatIcon = checkDoneBy(By.xpath("//div[contains(@class, 'IMICon__IMIconBackground')]"), "Icon Chat");
                 delaySecond(2);
-                if (chatIcon == null) {
-                    printE("Không thể thấy IconChat");
-                    return;
-                }
                 // check có hiển thị popup trả lời tin nhắn ngay không
                 WebElement popup = getElementByClassName("arco-popover-content");
                 if (popup != null) {
@@ -121,6 +132,7 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
                         if (actions != null && actions.size() == 2) {
                             actions.get(0).click();
                         } else {
+                            throw new InterruptedException("action button maybe null");
                         }
                         print("Click button: Có lẽ để sau");
                     } catch (Exception e) {
@@ -134,7 +146,7 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
                         if (phone.isEmpty()) {
                             phone = "Không lấy được phone";
                         }
-                        print("SĐT " + phone);
+                        print("SĐT: " + phone);
                         TiktokOrderRateBody body = new TiktokOrderRateBody();
                         body.orderId = orderId;
                         body.buyerPhone = phone;
@@ -142,8 +154,8 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
                         break;
                     case 2:// Gửi cảm ơn
                         chatIcon.click();
-                        TiktokOrderRateBody bodyThanks = new TiktokOrderRateBody();
                         sendChat();
+                        TiktokOrderRateBody bodyThanks = new TiktokOrderRateBody();
                         bodyThanks.orderId = orderId;
                         bodyThanks.sendThanks = true;
                         jsonArray.add(bodyThanks);
@@ -164,19 +176,22 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
 
 
     private String getBuyerPhone() {
-        WebElement element = checkDoneBy(By.className("order-arco-icon-eyeInvisible"), "Icon Eye");
-        if (element == null) {
+        WebElement element;
+        try {
+            element = checkDoneBy(By.className("order-arco-icon-eyeInvisible"), "Icon Eye");
+            element.click();
+            delaySecond(3);
+            element = getElementByClassName("order-arco-icon-eye");
+            if (element == null) {
+                throw new InterruptedException("Click eye: không tìm thấy element SDT");
+            }
+            WebElement parentElement = element.findElement(By.xpath("./.."));
+            return parentElement.getText();
+        } catch (InterruptedException e) {
+            printE(e.getMessage());
             return "";
         }
-        element.click();
-        delaySecond(3);
-        element = getElementByClassName("order-arco-icon-eye");
-        if (element == null) {
-            print("Click eye không tìm thấy element SDT");
-            return "";
-        }
-        WebElement parentElement = element.findElement(By.xpath("./.."));
-        return parentElement.getText();
+
     }
 
 
@@ -184,6 +199,9 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
         try {
             delaySecond(5);
             ArrayList<String> tabs = new ArrayList<>(webDriver.getWindowHandles());
+            if (tabs.size() == 1) {
+                throw new InterruptedException("Mở tab chat lỗi");
+            }
             webDriver.switchTo().window(tabs.get(1));
             String[] array = new String[]{
                     "Shop thấy bạn đã nhận hàng",
@@ -193,27 +211,26 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
                     "ĐỪNG VỘI ĐÁNH GIÁ XẤU nếu sản phẩm có vấn đề, hãy nhắn tin hoặc liên hệ: 0342.092.686 để shop xử lý ngay ạ."
             };
             WebElement textArea = checkDoneBy(By.xpath("//*[@id='chat-input-textarea']/textarea"), "ChatInput");
-            if (textArea == null) {
-                return;
-            }
 //          Check khách hàng có đang chat với shop không?
-//            delaySecond(5);
-//            List<WebElement> listContent = getElementsByXpath("//div[@class='chatd-scrollView-content']/div");
-//            System.out.println(listContent);
-//            if (listContent != null && listContent.size() > 3) {
-//                printColor("[SKIP]Khách hàng đang có cuộc trò chuyện với shop, bỏ qua đơn hàng ", Color.BLUE);
-//            } else {
-            for (String value : array) {
-                textArea.sendKeys(value);
-                textArea.sendKeys(Keys.SHIFT, Keys.ENTER);
+            delaySecond(5);
+            List<WebElement> listContent = getElementsByXpath("//div[@class='chatd-scrollView-content']/div");
+            System.out.println(listContent);
+            if (listContent != null && listContent.size() > 3) {
+                printColor("[SKIP]Khách hàng đang có cuộc trò chuyện với shop, bỏ qua đơn hàng ", Color.BLUE);
+            } else {
+                for (String value : array) {
+                    textArea.sendKeys(value);
+                    textArea.sendKeys(Keys.SHIFT, Keys.ENTER);
+                }
+                textArea.sendKeys(Keys.ENTER);
             }
-            textArea.sendKeys(Keys.ENTER);
             print("Gửi chat thành công");
             delayBetween(5, 10);
             webDriver.close();
             webDriver.switchTo().window(tabs.get(0));
             print("Tắt chat");
             delayBetween(10, 20);
+
         } catch (Exception exception) {
             printException(exception);
             exception.printStackTrace();

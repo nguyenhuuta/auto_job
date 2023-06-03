@@ -6,6 +6,16 @@ package com.autojob.model.entities;
 public class TiktokOrderRateBody {
     public String orderId;
     public String buyerPhone;
-    public int rate;
-    public boolean sendThanks;
+    public Integer rate;
+    public Boolean sendThanks;
+
+    @Override
+    public String toString() {
+        return "TiktokOrderRateBody{" +
+                "orderId='" + orderId + '\'' +
+                ", buyerPhone='" + buyerPhone + '\'' +
+                ", rate=" + rate +
+                ", sendThanks=" + sendThanks +
+                '}';
+    }
 }

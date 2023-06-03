@@ -1,9 +1,9 @@
 package com.autojob.tiktok;
 
-import com.autojob.api.ApiManager;
-import com.autojob.api.RequestQueue;
 import com.autojob.base.WebDriverCallback;
-import com.autojob.model.entities.*;
+import com.autojob.model.entities.AccountModel;
+import com.autojob.model.entities.ChromeSetting;
+import com.autojob.model.entities.MessageListView;
 import com.autojob.task.BaseWebViewTask;
 import com.autojob.utils.Logger;
 import com.autojob.utils.TimeUtils;
@@ -13,9 +13,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import retrofit2.Call;
 
-import java.util.*;
+import java.util.Calendar;
+import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -28,8 +28,7 @@ public class TiktokParentTask extends TimerTask {
     static final String ENDPOINT = "https://seller-vn.tiktok.com/";
     static final String URL_LOGIN = TiktokParentTask.ENDPOINT + "account/login";
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-    BaseWebViewTask sendThanksTask;
-    BaseWebViewTask getPhoneTask;
+    BaseWebViewTask orderDetailTask;
 
 
     private final AccountModel accountModel;
@@ -40,52 +39,24 @@ public class TiktokParentTask extends TimerTask {
     public TiktokParentTask(AccountModel accountModel, WebDriverCallback callback) {
         this.accountModel = accountModel;
         this.webDriverCallback = callback;
-    }
-
-
-    private MessageListView formatMessage(String message, Color color) {
-        String time = TimeUtils.getCurrentDate(TimeUtils.formatDate1);
-        String content = String.format("%s - [%s] => %s", time, accountModel.shopName, message);
-        return new MessageListView(content, color);
-    }
-
-    public void updateListView(String message, Color color) {
-        MessageListView item = formatMessage(message, color);
-        webDriverCallback.updateListView(accountModel.type, item);
-    }
-
-    public void updateListView(String message) {
-        updateListView(message, null);
+        orderDetailTask = new TiktokOrderDetailTask(accountModel, webDriverCallback);
     }
 
     @Override
     public void run() {
-        try {
-            int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
-            System.out.println("Giờ hiện tại " + hour);
-            if (hour < 8 || hour > 22) {
-                updateListView("Ngoài giờ hoạt động 8h -> 22h");
-                return;
-            }
-            if (getPhoneTask == null) {
-                getPhoneTask = new TiktokOrderDetailTask(accountModel, webDriverCallback);
-                getPhoneTask.webDriver = webDriver;
-                getPhoneTask.webDriverWait = webDriverWait;
-            }
-            getPhoneTask.run();
-        } catch (Exception e) {
-            Logger.error(e.toString());
-            updateListView(e.toString());
-            e.printStackTrace();
-        } finally {
-            String text = "Lần chạy tới vào lúc " + TimeUtils.addMinute(10);
-            updateListView("DONE - " + text);
+        int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        System.out.println("Giờ hiện tại " + hour);
+        if (hour < 8 || hour > 22) {
+            orderDetailTask.updateListView("Ngoài giờ hoạt động 8h -> 22h");
+            return;
         }
+        orderDetailTask.run();
+        //TODO feedback rate here
     }
 
     public void delaySecond(long time) {
         try {
-            updateListView("Đợi " + time + "s");
+            orderDetailTask.updateListView("Đợi " + time + "s");
             TimeUnit.SECONDS.sleep(time);
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -98,32 +69,25 @@ public class TiktokParentTask extends TimerTask {
         ChromeSetting chromeSetting = new ChromeSetting(true, 0, 0, profilePath, true);
         webDriver = WebDriverUtils.getInstance().createWebDriver(chromeSetting);
         webDriverWait = new WebDriverWait(webDriver, 10);
-        updateListView("Start CHROME");
+        orderDetailTask.webDriver = webDriver;
+        orderDetailTask.webDriverWait = webDriverWait;
+        orderDetailTask.updateListView("Start CHROME");
         checkLogin();
-    }
-
-    WebElement findElementById(String xpath) {
-        try {
-            return webDriver.findElement(By.id(xpath));
-        } catch (Exception e) {
-            Logger.warning("TiktokParentTask", "Not found element : " + xpath);
-            return null;
-        }
     }
 
     private void checkLogin() {
         webDriver.get(URL_LOGIN);
         delaySecond(10);
-        boolean needLogin = findElementById("sso_sdk") != null;
+        boolean needLogin = orderDetailTask.getElementById("sso_sdk") != null;
         if (needLogin) {
             webDriverCallback.triggerLogin(accountModel, true);
-            updateListView(accountModel.shopName + " CHƯA LOGIN, YÊU CẦU LOGIN", Color.RED);
+            orderDetailTask.printE(accountModel.shopName + " CHƯA LOGIN, YÊU CẦU LOGIN");
             do {
-                updateListView("đợi 60s");
+                orderDetailTask.print("đợi 60s");
                 delaySecond(60);
-                needLogin = findElementById("sso_sdk") != null;
+                needLogin = orderDetailTask.getElementById("sso_sdk") != null;
             } while (needLogin);
-            updateListView("60s để thao tác 1 lượt gửi tin nhắn để tắt các popup");
+            orderDetailTask.print("60s để thao tác 1 lượt gửi tin nhắn để tắt các popup");
             delaySecond(60);
         }
         webDriverCallback.triggerLogin(accountModel, false);
