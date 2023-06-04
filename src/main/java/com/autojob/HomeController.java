@@ -73,6 +73,7 @@ public class HomeController implements Initializable, WebDriverCallback {
                 tiktoks = response.stream().filter(e -> e.type == 2).collect(Collectors.toList());
                 createViewShopee();
                 createViewTiktok();
+                runTiktok(null);
             }
 
             @Override
@@ -110,33 +111,6 @@ public class HomeController implements Initializable, WebDriverCallback {
                 };
             }
         });
-        int numberAccounts = tiktoks.size();
-        Observable.interval(0, 10, TimeUnit.SECONDS)
-                .takeWhile(number -> number < numberAccounts)
-                .subscribe(new Observer<Long>() {
-                    @Override
-                    public void onCompleted() {
-                        Logger.info("Khởi tạo hoàn tất");
-                    }
-
-                    @Override
-                    public void onError(Throwable throwable) {
-
-                    }
-
-                    @Override
-                    public void onNext(Long aLong) {
-                        int index = Math.toIntExact(aLong);
-                        AccountModel account = tiktoks.get(index);
-                        BaseController controller = new TiktokController(account, HomeController.this);
-                        controllers.put(account.shopName, controller);
-                        Button button = new Button(account.shopName);
-                        button.setUserData(account.shopName);
-                        button.setOnAction(event -> controllers.get(account.shopName).bringDriverToFront());
-                        buttonMapChrome.put(account.rowId, button);
-                        actionTiktok.getChildren().add(button);
-                    }
-                });
     }
 
 
@@ -160,6 +134,9 @@ public class HomeController implements Initializable, WebDriverCallback {
                         try {
                             int index = Math.toIntExact(aLong);
                             AccountModel account = tiktoks.get(index);
+                            if (account.shopId == 6) {
+                                return;
+                            }
                             BaseController controller = new TiktokController(account, HomeController.this);
                             controller.runNow();
                             controllers.put(account.shopName, controller);

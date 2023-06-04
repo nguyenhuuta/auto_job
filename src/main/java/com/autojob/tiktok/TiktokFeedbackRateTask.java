@@ -3,7 +3,9 @@ package com.autojob.tiktok;
 import com.autojob.base.WebDriverCallback;
 import com.autojob.model.entities.AccountModel;
 import com.autojob.task.BaseWebViewTask;
+import com.autojob.utils.Utils;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import java.lang.reflect.MalformedParametersException;
@@ -28,14 +30,82 @@ class TiktokFeedbackRateTask extends BaseWebViewTask {
 
     @Override
     public void run() {
+
         try {
             delaySecond(3);
             load(URL_RATE);
             List<WebElement> listRate = checkDoneListBy(By.className("arco-tag-checkable"), "Rate");
-            if (listRate == null) {
-                throw new InterruptedException("Không tìm thấy list đánh giá");
+            if (listRate.size() == 7) {
+                // 1-5: star
+                // 6: đang chờ trả lời, 7 đã trả lời
+                int starIndex = 4;
+                WebElement waitingFeedback = listRate.get(5);
+                waitingFeedback.click();
+                delayBetween(3, 5);
+                while (starIndex < 5) {
+//                    if (starIndex > 0) {
+//                        listRate.get(starIndex - 1).click();
+//                        delayBetween(3, 5);
+//                        print("Bỏ chọn " + (starIndex) + " sao");
+//                    }
+                    WebElement elementStar = listRate.get(starIndex);
+                    elementStar.click();
+                    print("Chọn " + (starIndex + 1) + " sao");
+                    delayBetween(3, 5);
+                    checkListRate(starIndex + 1);
+                    starIndex++;
+                }
             }
-            listRate.get(2).click();
+
+        } catch (InterruptedException e) {
+            printException(e);
+        }
+    }
+
+
+    private void checkListRate(int start) {
+        try {
+            List<WebElement> feedbackElements = checkDoneListBy(By.xpath("//div[contains(text(), 'Phản hồi')]"), "Rate List");
+            int size = feedbackElements.size();
+            print(size + " đơn hàng chưa phản hồi");
+            int count = 0;
+            String content = "";
+            if (start <= 2) {
+                content = "Chào bạn không biết là sản phẩm bên mình có vấn đề gì? Mong bạn phản hồi lại giúp shop trong phần tin nhắn để shop giải quyết cho mình nhé.";
+            }
+            while (count < size) {
+                try {
+                    WebElement feedbackAt = feedbackElements.get(count);
+                    feedbackAt.click();
+                    delaySecond(3);
+                    WebElement dialog = getElementByClassName("arco-modal-content");
+                    WebElement textArea = getElementByTagName(dialog, "textarea");
+                    WebElement buttonSend = getElementByXpath("//span[contains(text(), 'Gửi')]");
+                    if (start >= 3) {
+                        int random = Utils.randomInteger(0, 2);
+                        if (random == 0) {
+                            content = "Shop cảm ơn sự ủng hộ của bạn ạ. Mong là bạn sẽ tiếp tục theo dõi và ủng hộ shop nha ^^";
+                        } else if (random == 1) {
+                            content = "Shop cảm ơn đánh giá của bạn. Hy vọng bạn sẽ giới thiệu bạn bè đến với shop nữa nha ^^";
+                        } else {
+                            content = "Shop cảm ơn phản hồi của bạn. Chúc bạn ngày làm việc vui vẻ =))";
+                        }
+                    }
+                    int random = Utils.randomInteger(0, 1);
+                    if (random == 0) {
+                        textArea.sendKeys(content);
+                    } else {
+                        simulateSendKeys(textArea, content);
+                    }
+                    print("Gửi chat thứ " + count + 1);
+                    delayBetween(2, 3);
+                    buttonSend.click();
+                    delayBetween(3, 5);
+                } catch (Exception e) {
+                    printException(e);
+                }
+                count++;
+            }
         } catch (InterruptedException e) {
             printException(e);
         }

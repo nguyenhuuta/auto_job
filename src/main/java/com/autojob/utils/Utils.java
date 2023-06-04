@@ -33,6 +33,7 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -125,9 +126,10 @@ public class Utils {
     }
 
     public static int randomInteger(int from, int to) {
-        int length = to - from;
-        if (length <= 0) return 0;
-        return from + new Random().nextInt(length);
+        return ThreadLocalRandom.current().nextInt(from, to + 1);
+//        int length = to - from;
+//        if (length <= 0) return 0;
+//        return from + new Random().nextInt(length);
     }
 
     public static void grantFilePermission(File file) {

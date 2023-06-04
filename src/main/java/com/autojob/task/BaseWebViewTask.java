@@ -498,10 +498,6 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     }
 
     public List<WebElement> getElementsByClassName(WebElement parentElement, String className) {
-        if (!isValidTaskInRunning()) {
-            print("isValidTaskInRunning FALSE");
-            return null;
-        }
         try {
             return parentElement.findElements(By.className(className));
         } catch (Exception e) {
@@ -666,21 +662,19 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     }
 
     public final void simulateSendKeys(WebElement element, String text) {
-        if (!isValidTaskInRunning()) return;
         if (element != null) {
             element.click();
             wait(500, TimeUnit.MILLISECONDS);
             Actions actions = new Actions(webDriver);
             for (char c : text.toCharArray()) {
                 actions.sendKeys(Character.toString(c));
-                actions.pause(Utils.getRandomNumber(50, 300));
+                actions.pause(Utils.getRandomNumber(20, 200));
             }
             actions.build().perform();
         }
     }
 
     public final void simulateSendKeys(WebElement element, String[] texts) {
-        if (!isValidTaskInRunning()) return;
         if (element != null) {
             element.click();
             wait(500, TimeUnit.MILLISECONDS);
@@ -767,7 +761,6 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     public void delayBetween(int start, int end) {
         try {
             int number = Utils.randomInteger(start, end);
-            print("Đợi " + number + "s");
             TimeUnit.SECONDS.sleep(number);
         } catch (InterruptedException e) {
             printE("delay5to10s " + e);
@@ -847,7 +840,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
                 elements = null;
             }
             count++;
-        } while (elements == null);
+        } while (elements == null || elements.isEmpty());
         print(tag + " load done");
         return elements;
     }

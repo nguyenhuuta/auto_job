@@ -50,8 +50,8 @@ public class TiktokParentTask extends TimerTask {
             orderDetailTask.updateListView("Ngoài giờ hoạt động 8h -> 22h");
             return;
         }
-        orderDetailTask.run();
-//        feedbackRating.run();
+//        orderDetailTask.run();
+        feedbackRating.run();
     }
 
 
@@ -59,6 +59,7 @@ public class TiktokParentTask extends TimerTask {
         String profilePath = System.getProperty("user.dir") + "/data/chrome_profile/" + accountModel.shopName;
         ChromeSetting chromeSetting = new ChromeSetting(true, 0, 0, profilePath, true);
         WebDriver webDriver = WebDriverUtils.getInstance().createWebDriver(chromeSetting);
+        orderDetailTask.print("Start CHROME");
         orderDetailTask.setWebDriver(webDriver);
         feedbackRating.setWebDriver(webDriver);
         checkLogin();
