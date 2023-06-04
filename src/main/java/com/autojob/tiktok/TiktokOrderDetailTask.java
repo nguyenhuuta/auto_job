@@ -223,9 +223,9 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
                     textArea.sendKeys(Keys.SHIFT, Keys.ENTER);
                 }
                 textArea.sendKeys(Keys.ENTER);
+                print("Gửi chat thành công");
+                delayBetween(5, 10);
             }
-            print("Gửi chat thành công");
-            delayBetween(5, 10);
             webDriver.close();
             webDriver.switchTo().window(tabs.get(0));
             print("Tắt chat");

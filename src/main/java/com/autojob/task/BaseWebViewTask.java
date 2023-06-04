@@ -130,8 +130,13 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     }
 
     public void load(String url) {
-        webDriver.get(url);
-        waitLoadDone();
+        try {
+            webDriver.get(url);
+            waitLoadDone();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     public void waitLoadDone() {
@@ -826,6 +831,25 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         } while (element == null);
         print(tag + " load done");
         return element;
+    }
+
+    public List<WebElement> checkDoneListBy(By by, String tag) throws InterruptedException {
+        List<WebElement> elements;
+        int count = 1;
+        do {
+            if (count == 5) {
+                throw new InterruptedException(tag + " Hết số lần thử");
+            }
+            delaySecond(2);
+            try {
+                elements = webDriver.findElements(by);
+            } catch (Exception ignore) {
+                elements = null;
+            }
+            count++;
+        } while (elements == null);
+        print(tag + " load done");
+        return elements;
     }
 
 
