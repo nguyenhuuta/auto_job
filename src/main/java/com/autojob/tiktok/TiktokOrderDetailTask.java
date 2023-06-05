@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * Created by OpenYourEyes on 01/06/2023
  */
-class TiktokOrderDetailTask extends BaseWebViewTask {
+class TiktokOrderDetailTask extends BaseTiktokTask {
     final String urlDetail = "%sorder/detail?order_no=%s&shop_region=VN";
     /**
      * 0: Trạng thái bắt đầu
@@ -126,32 +126,19 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
         while (index < size) {
             try {
                 String orderId = orderIds.get(index);
-                if(type != 3){
+                WebElement chatIcon;
+                if (type != 3) {
                     String currentIndex = (index + 1) + "/" + size;
                     String format = String.format("============ %s| %s ============", currentIndex, orderId);
                     print(format);
                     String url = String.format(urlDetail, TiktokParentTask.ENDPOINT, orderId);
-                    load(url);
+                    chatIcon = openUrl(url, By.xpath("//div[contains(@class, 'IMICon__IMIconBackground')]"), "Icon Chat");
+                } else {
+                    // được mở khi click vào phản hồi của khách hàng
+                    chatIcon = checkDoneBy(By.xpath("//div[contains(@class, 'IMICon__IMIconBackground')]"), "Icon Chat");
+                    hidePopupReplyLate();
                 }
-                WebElement chatIcon = checkDoneBy(By.xpath("//div[contains(@class, 'IMICon__IMIconBackground')]"), "Icon Chat");
                 delaySecond(2);
-                // check có hiển thị popup trả lời tin nhắn ngay không
-                WebElement popup = getElementByClassName("arco-popover-content");
-                if (popup != null) {
-                    print("Hiển thị popup trả lời tin nhắn");
-                    try {
-                        List<WebElement> actions = getElementsByTagName(popup, "button");
-                        if (actions != null && actions.size() == 2) {
-                            actions.get(0).click();
-                        } else {
-                            throw new InterruptedException("action button maybe null");
-                        }
-                        print("Click button: Có lẽ để sau");
-                    } catch (Exception e) {
-                        printE("Click button 'Có lẽ để sau' lỗi " + e);
-                        executeScript("document.getElementsByClassName('zoomInFadeOut-enter-done')[0].style.display = 'none'");
-                    }
-                }
                 switch (type) {
                     case 1: // Lấy SĐT
                         String phone = getBuyerPhone();
@@ -180,7 +167,7 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
                 }
             } catch (Exception e) {
                 printE("OpenOrderDetail Lỗi " + e);
-                ScreenshotFullModel.screenShotFull(webDriver,"ERRRo");
+                ScreenshotFullModel.screenShotFull(webDriver, "order_detail");
                 delaySecond(5);
             }
             index++;
@@ -211,12 +198,12 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
         try {
             delaySecond(5);
             ArrayList<String> tabs = new ArrayList<>(webDriver.getWindowHandles());
-            if(type == 2){
+            if (type == 2) {
                 if (tabs.size() != 2) {
                     throw new InterruptedException("Mở tab chat lỗi");
                 }
                 webDriver.switchTo().window(tabs.get(1));
-            }else if (type == 3){
+            } else if (type == 3) {
                 if (tabs.size() != 3) {
                     throw new InterruptedException("Mở tab chat lỗi");
                 }

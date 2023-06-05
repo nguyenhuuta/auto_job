@@ -7,30 +7,23 @@ import com.autojob.base.WebDriverCallback;
 import com.autojob.model.entities.AccountModel;
 import com.autojob.model.entities.BaseResponse;
 import com.autojob.model.entities.MessageListView;
-import com.autojob.pane.HistoryListBox;
-import com.autojob.shopee.ShopeeController;
 import com.autojob.tiktok.TiktokController;
 import com.autojob.utils.Logger;
-import com.autojob.utils.TimeUtils;
-import com.autojob.utils.Utils;
 import javafx.application.Platform;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.util.Callback;
 import retrofit2.Call;
 import rx.Observable;
 import rx.Observer;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
 
 import java.net.URL;
 import java.util.*;
@@ -59,6 +52,7 @@ public class HomeController implements Initializable, WebDriverCallback {
         getAccounts();
     }
 
+
     void getAccounts() {
         Call<BaseResponse<List<AccountModel>>> call = ApiManager.GOOGLE_ENDPOINT.getAccountShopee(ApiManager.URL_GOOGLE_SHEET);
         RequestQueue.getInstance().enqueueRequest(call, new RequestQueue.IRequestCallback<List<AccountModel>>() {
@@ -84,12 +78,12 @@ public class HomeController implements Initializable, WebDriverCallback {
     }
 
     private void createViewShopee() {
-        Logger.info("createViewShopee");
-        for (AccountModel account : shopees) {
-            HistoryListBox child = new HistoryListBox(new ShopeeController(account));
-            containerShopee.getChildren().add(child);
-            HBox.setHgrow(child, Priority.ALWAYS);
-        }
+//        Logger.info("createViewShopee");
+//        for (AccountModel account : shopees) {
+//            HistoryListBox child = new HistoryListBox(new ShopeeController(account));
+//            containerShopee.getChildren().add(child);
+//            HBox.setHgrow(child, Priority.ALWAYS);
+//        }
     }
 
     private void createViewTiktok() {
@@ -134,9 +128,9 @@ public class HomeController implements Initializable, WebDriverCallback {
                         try {
                             int index = Math.toIntExact(aLong);
                             AccountModel account = tiktoks.get(index);
-//                            if(account.shopId == 6){
-//                                return;
-//                            }
+                            if (account.shopId == 6) {
+                                return;
+                            }
                             BaseController controller = new TiktokController(account, HomeController.this);
                             controller.runNow();
                             controllers.put(account.shopName, controller);
@@ -152,12 +146,6 @@ public class HomeController implements Initializable, WebDriverCallback {
                         }
                     }
                 });
-
-
-//        Logger.info("RUNTOK");
-//        for (Map.Entry<String, BaseController> entry : controllers.entrySet()) {
-//            entry.getValue().runNow();
-//        }
     }
 
     @Override

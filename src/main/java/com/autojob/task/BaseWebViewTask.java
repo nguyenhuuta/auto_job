@@ -1,24 +1,21 @@
 package com.autojob.task;
 
 import com.autojob.App;
-import com.autojob.api.ApiManager;
-import com.autojob.api.RequestQueue;
 import com.autojob.base.WebDriverCallback;
-import com.autojob.model.entities.*;
+import com.autojob.model.entities.AccountModel;
+import com.autojob.model.entities.ChromeSetting;
+import com.autojob.model.entities.MessageListView;
 import com.autojob.utils.*;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import retrofit2.Call;
-import rx.subjects.BehaviorSubject;
-import rx.subjects.PublishSubject;
 
-import java.util.Date;
+import java.net.URL;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 public abstract class BaseWebViewTask implements IRegisterStopApp {
@@ -825,8 +822,9 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     }
 
     public List<WebElement> checkDoneListBy(By by, String tag) throws InterruptedException {
-        return checkDoneListBy(by,tag,true);
+        return checkDoneListBy(by, tag, true);
     }
+
     public List<WebElement> checkDoneListBy(By by, String tag, boolean hasEmpty) throws InterruptedException {
         List<WebElement> elements;
         int count = 1;
@@ -840,7 +838,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
             } catch (Exception ignore) {
                 elements = null;
             }
-            if(!hasEmpty && elements != null && elements.isEmpty()){
+            if (!hasEmpty && elements != null && elements.isEmpty()) {
                 elements = null;
             }
             count++;
@@ -866,4 +864,16 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
 //            e.printStackTrace();
 //        }
 //    }
+
+    public void playSoundError() {
+        try {
+            URL url = this.getClass().getResource("/bip2.mp3");
+            System.out.println("Resource URL two is = " + url);
+            Media hit = new Media(url.toExternalForm());
+            MediaPlayer mediaPlayer = new MediaPlayer(hit);
+            mediaPlayer.play();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
