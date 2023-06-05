@@ -12,6 +12,7 @@ import javafx.scene.paint.Color;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.net.URL;
@@ -538,6 +539,15 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
+    protected final WebElement getElementByXpath(WebElement parent, String xpath) {
+        try {
+            return parent.findElement(By.xpath(xpath));
+        } catch (Exception e) {
+            Logger.warning(getTag(), "Not found element : " + xpath);
+            return null;
+        }
+    }
+
     protected final List<WebElement> getElementsById(WebElement parentElement, String id) {
         if (!isValidTaskInRunning()) return null;
         try {
@@ -875,5 +885,10 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public WebElement waitUntilElementIsVisible(By identifier) {
+        WebElement element = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(identifier));
+        return element;
     }
 }

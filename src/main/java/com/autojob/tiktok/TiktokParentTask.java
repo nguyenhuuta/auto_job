@@ -30,6 +30,7 @@ public class TiktokParentTask extends TimerTask {
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     BaseWebViewTask orderDetailTask;
     BaseWebViewTask feedbackRating;
+    BaseWebViewTask feedbackRating2;
 
 
     private final AccountModel accountModel;
@@ -40,6 +41,7 @@ public class TiktokParentTask extends TimerTask {
         this.webDriverCallback = callback;
         orderDetailTask = new TiktokOrderDetailTask(accountModel, webDriverCallback);
         feedbackRating = new TiktokFeedbackRateTask(accountModel, webDriverCallback);
+        feedbackRating2 = new TiktokFeedbackRateTask2(accountModel, webDriverCallback);
     }
 
     @Override
@@ -51,7 +53,8 @@ public class TiktokParentTask extends TimerTask {
             return;
         }
 //        orderDetailTask.run();
-        feedbackRating.run();
+//        feedbackRating.run();
+        feedbackRating2.run();
 
         String text = "LẦN CHẠY TỚI VÀO: " + TimeUtils.addMinute(10);
         orderDetailTask.updateListView(text);
@@ -65,6 +68,7 @@ public class TiktokParentTask extends TimerTask {
         orderDetailTask.print("Start CHROME");
         orderDetailTask.setWebDriver(webDriver);
         feedbackRating.setWebDriver(webDriver);
+        feedbackRating2.setWebDriver(webDriver);
         checkLogin();
     }
 
