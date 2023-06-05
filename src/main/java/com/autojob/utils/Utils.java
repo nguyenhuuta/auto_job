@@ -127,9 +127,6 @@ public class Utils {
 
     public static int randomInteger(int from, int to) {
         return ThreadLocalRandom.current().nextInt(from, to + 1);
-//        int length = to - from;
-//        if (length <= 0) return 0;
-//        return from + new Random().nextInt(length);
     }
 
     public static void grantFilePermission(File file) {

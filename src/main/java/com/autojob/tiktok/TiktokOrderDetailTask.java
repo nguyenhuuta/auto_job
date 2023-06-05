@@ -110,6 +110,15 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
         }
     }
 
+    /**
+     * Trả lời khách hàng từ đánh giá 1, 2*
+     */
+    public void feedbackOrder(String orderId) {
+        type = 2;
+        orderIds.add(orderId);
+        openOrderDetail();
+    }
+
     void openOrderDetail() {
         int size = orderIds.size();
         int index = 0;
@@ -174,7 +183,6 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
         updateOrderToServer();
     }
 
-
     private String getBuyerPhone() {
         WebElement element;
         try {
@@ -191,7 +199,6 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
             printE(e.getMessage());
             return "";
         }
-
     }
 
 
