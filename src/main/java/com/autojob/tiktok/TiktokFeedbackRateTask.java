@@ -48,6 +48,23 @@ class TiktokFeedbackRateTask extends BaseWebViewTask {
             delaySecond(3);
             load(URL_RATE);
             List<WebElement> listRate = checkDoneListBy(By.className("arco-tag-checkable"), "Rate",false);
+
+            WebElement popup = getElementByClassName("arco-popover-content");
+            if (popup != null) {
+                print("Hiển thị popup trả lời tin nhắn");
+                try {
+                    List<WebElement> actions = getElementsByTagName(popup, "button");
+                    if (actions != null && actions.size() == 2) {
+                        actions.get(0).click();
+                    } else {
+                        throw new InterruptedException("action button maybe null");
+                    }
+                    print("Click button: Có lẽ để sau");
+                } catch (Exception e) {
+                    printE("Click button 'Có lẽ để sau' lỗi " + e);
+                    executeScript("document.getElementsByClassName('zoomInFadeOut-enter-done')[0].style.display = 'none'");
+                }
+            }
             int size = listRate.size();
             print("Action Star: " + size);
             if (size == 7) {
@@ -70,6 +87,7 @@ class TiktokFeedbackRateTask extends BaseWebViewTask {
                     delayBetween(3, 5);
                     checkListRate(currentStar);
                     starIndex++;
+                    print("starIndex " + starIndex);
                 }
                 print("HOÀN THÀNH PHẢN HỒI");
             }
@@ -110,6 +128,9 @@ class TiktokFeedbackRateTask extends BaseWebViewTask {
                     WebElement dialog = getElementByClassName("arco-modal-content");
                     WebElement textArea = getElementByTagName(dialog, "textarea");
                     WebElement buttonSend = getElementByXpath("//span[contains(text(), 'Gửi')]");
+                    WebElement buttonCancel = getElementByXpath("//span[contains(text(), 'Hủy')]");
+                    buttonCancel.click();
+                    delaySecond(1);
                     if (start >= 3) {
                         content = randomFeedbackGood();
                     }
@@ -127,6 +148,10 @@ class TiktokFeedbackRateTask extends BaseWebViewTask {
                     printException(e);
                 }
                 count++;
+            }
+            if(count >0){
+                scrollToTop();
+                delaySecond(2);
             }
         } catch (InterruptedException e) {
             printException(e);

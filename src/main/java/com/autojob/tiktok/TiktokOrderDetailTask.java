@@ -231,7 +231,7 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
 //          Check khách hàng có đang chat với shop không?
             delaySecond(5);
             List<WebElement> listContent = getElementsByXpath("//div[@class='chatd-scrollView-content']/div");
-            if (listContent != null && listContent.size() > 3) {
+            if (type != 3 && listContent != null && listContent.size() > 3) {
                 printColor("[SKIP]Khách hàng đang có cuộc trò chuyện với shop, bỏ qua đơn hàng ", Color.BLUE);
             } else {
                 for (String value : array) {

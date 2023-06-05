@@ -178,9 +178,8 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     }
 
     protected final JavascriptExecutor getJavascriptExecutor() {
-        if (!isValidTaskInRunning()) return null;
-        if (getWebDriver() instanceof JavascriptExecutor) {
-            return (JavascriptExecutor) getWebDriver();
+        if (webDriver instanceof JavascriptExecutor) {
+            return (JavascriptExecutor) webDriver;
         } else {
             throw new IllegalArgumentException("This web driver does not support javascript");
         }
@@ -235,7 +234,6 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     }
 
     protected final void scrollToTop() {
-        if (!isValidTaskInRunning()) return;
         try {
             getJavascriptExecutor().executeScript("window.scrollTo(0, 0);");
         } catch (Exception e) {
@@ -244,7 +242,6 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     }
 
     protected final void scrollToBottom() {
-        if (!isValidTaskInRunning()) return;
         try {
             getJavascriptExecutor().executeScript("window.scrollTo(0, document.body.scrollHeight);");
         } catch (Exception e) {
@@ -806,12 +803,13 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         } while (!clickable);
     }
 
+    int numberRetry = 10;
 
     public WebElement checkDoneBy(By by, String tag) throws InterruptedException {
         WebElement element;
         int count = 1;
         do {
-            if (count == 5) {
+            if (count == numberRetry) {
                 throw new InterruptedException(tag + " Hết số lần thử");
             }
             delaySecond(2);
@@ -833,7 +831,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         List<WebElement> elements;
         int count = 1;
         do {
-            if (count == 5) {
+            if (count == numberRetry) {
                 throw new InterruptedException(tag + " Hết số lần thử");
             }
             delaySecond(2);
