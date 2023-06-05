@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ScreenshotFullModel {
 
-    private static final String TAG = ScreenshotFullModel.class.getSimpleName() + BuildConfig.VERSION_NAME;
+    private static final String TAG = ScreenshotFullModel.class.getSimpleName();
 
     public static String screenShotFull(WebDriver driver, String nameFile) {
         try {

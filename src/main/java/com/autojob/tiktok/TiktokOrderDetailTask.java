@@ -1,5 +1,6 @@
 package com.autojob.tiktok;
 
+import com.autojob.ScreenshotFullModel;
 import com.autojob.api.ApiManager;
 import com.autojob.api.RequestQueue;
 import com.autojob.base.WebDriverCallback;
@@ -29,7 +30,7 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
      * 0: Trạng thái bắt đầu
      * 1: Lấy SĐT
      * 2: Gửi lời cảm ơn đơn hàng
-     * 3: Trả lời đánh giá khách hàng
+     * 3: Trả lời đánh giá khách hàng 1,2*
      */
     private int type = 0;
     List<TiktokOrderRateBody> jsonArray = new ArrayList<>();
@@ -46,6 +47,8 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
             return "LẤY SĐT";
         } else if (type == 2) {
             return "GỬI CẢM ƠN";
+        } else if (type == 3) {
+            return "PHẢN HỒI";
         }
         return "";
 
@@ -104,8 +107,6 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
                 run();
             } else {
                 type = 0;
-                String text = "LẦN CHẠY TỚI VÀO: " + TimeUtils.addMinute(10);
-                print(text);
             }
         }
     }
@@ -113,8 +114,8 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
     /**
      * Trả lời khách hàng từ đánh giá 1, 2*
      */
-    public void feedbackOrder(String orderId) {
-        type = 2;
+    public void feedbackRateNotGood(String orderId) {
+        type = 3;
         orderIds.add(orderId);
         openOrderDetail();
     }
@@ -125,11 +126,13 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
         while (index < size) {
             try {
                 String orderId = orderIds.get(index);
-                String currentIndex = (index + 1) + "/" + size;
-                String format = String.format("============ %s| %s ============", currentIndex, orderId);
-                print(format);
-                String url = String.format(urlDetail, TiktokParentTask.ENDPOINT, orderId);
-                load(url);
+                if(type != 3){
+                    String currentIndex = (index + 1) + "/" + size;
+                    String format = String.format("============ %s| %s ============", currentIndex, orderId);
+                    print(format);
+                    String url = String.format(urlDetail, TiktokParentTask.ENDPOINT, orderId);
+                    load(url);
+                }
                 WebElement chatIcon = checkDoneBy(By.xpath("//div[contains(@class, 'IMICon__IMIconBackground')]"), "Icon Chat");
                 delaySecond(2);
                 // check có hiển thị popup trả lời tin nhắn ngay không
@@ -162,6 +165,7 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
                         jsonArray.add(body);
                         break;
                     case 2:// Gửi cảm ơn
+                    case 3:// Phản hồi đánh giá 1,2*
                         chatIcon.click();
                         sendChat();
                         TiktokOrderRateBody bodyThanks = new TiktokOrderRateBody();
@@ -176,6 +180,7 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
                 }
             } catch (Exception e) {
                 printE("OpenOrderDetail Lỗi " + e);
+                ScreenshotFullModel.screenShotFull(webDriver,"ERRRo");
                 delaySecond(5);
             }
             index++;
@@ -206,22 +211,26 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
         try {
             delaySecond(5);
             ArrayList<String> tabs = new ArrayList<>(webDriver.getWindowHandles());
-            if (tabs.size() == 1) {
-                throw new InterruptedException("Mở tab chat lỗi");
+            if(type == 2){
+                if (tabs.size() != 2) {
+                    throw new InterruptedException("Mở tab chat lỗi");
+                }
+                webDriver.switchTo().window(tabs.get(1));
+            }else if (type == 3){
+                if (tabs.size() != 3) {
+                    throw new InterruptedException("Mở tab chat lỗi");
+                }
+                webDriver.close();
+                delaySecond(1);
+                tabs = new ArrayList<>(webDriver.getWindowHandles());
+                webDriver.switchTo().window(tabs.get(1));
             }
-            webDriver.switchTo().window(tabs.get(1));
-            String[] array = new String[]{
-                    "Shop thấy bạn đã nhận hàng",
-                    "Không biết sản phẩm bên mình bạn có hài lòng không ạ?",
-                    "Hàng bên mình được đổi trả trong 3 ngày.",
-                    "Nếu bạn hài lòng hãy ĐÁNH GIÁ cho shop 5* nhé ^^.",
-                    "ĐỪNG VỘI ĐÁNH GIÁ XẤU nếu sản phẩm có vấn đề, hãy nhắn tin hoặc liên hệ: 0342.092.686 để shop xử lý ngay ạ."
-            };
+
+            String[] array = message();
             WebElement textArea = checkDoneBy(By.xpath("//*[@id='chat-input-textarea']/textarea"), "ChatInput");
 //          Check khách hàng có đang chat với shop không?
             delaySecond(5);
             List<WebElement> listContent = getElementsByXpath("//div[@class='chatd-scrollView-content']/div");
-            System.out.println(listContent);
             if (listContent != null && listContent.size() > 3) {
                 printColor("[SKIP]Khách hàng đang có cuộc trò chuyện với shop, bỏ qua đơn hàng ", Color.BLUE);
             } else {
@@ -242,5 +251,21 @@ class TiktokOrderDetailTask extends BaseWebViewTask {
             printException(exception);
             exception.printStackTrace();
         }
+    }
+
+    private String[] message() {
+        if (type == 2) {
+            return new String[]{
+                    "Shop thấy bạn đã nhận hàng",
+                    "Không biết sản phẩm bên mình bạn có hài lòng không ạ?",
+                    "Hàng bên mình được đổi trả trong 3 ngày.",
+                    "Nếu bạn hài lòng hãy ĐÁNH GIÁ cho shop 5* nhé ^^.",
+                    "ĐỪNG VỘI ĐÁNH GIÁ XẤU nếu sản phẩm có vấn đề, hãy nhắn tin hoặc liên hệ: 0342.092.686 để shop xử lý ngay ạ."
+            };
+        } else if (type == 3) {
+            return new String[]{
+                    TiktokFeedbackRateTask.messageNotGood};
+        }
+        return new String[]{};
     }
 }

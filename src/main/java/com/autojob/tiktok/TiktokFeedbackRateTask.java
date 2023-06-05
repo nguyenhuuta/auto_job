@@ -13,6 +13,8 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
+import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
 import java.lang.reflect.MalformedParametersException;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +24,9 @@ import java.util.List;
  */
 class TiktokFeedbackRateTask extends BaseWebViewTask {
     String URL_RATE = "https://seller-vn.tiktok.com/product/rating";
-
+    public static String messageNotGood = "Chào bạn không biết là sản phẩm bên mình có vấn đề gì? Mong bạn phản hồi lại giúp shop trong phần tin nhắn để shop giải quyết cho mình nhé.";
+    private TiktokOrderDetailTask orderDetailTask;
+    private int currentStar =0;
     public TiktokFeedbackRateTask(AccountModel accountModel, WebDriverCallback webDriverCallback) {
         super(accountModel, webDriverCallback);
     }
@@ -30,7 +34,11 @@ class TiktokFeedbackRateTask extends BaseWebViewTask {
 
     @Override
     public String jobName() {
-        return "FEEDBACK RATE";
+        String text = "PHẢN HỒI";
+        if(currentStar > 0){
+            return text +" " + currentStar +" SAO";
+        }
+        return text;
     }
 
 
@@ -39,29 +47,32 @@ class TiktokFeedbackRateTask extends BaseWebViewTask {
         try {
             delaySecond(3);
             load(URL_RATE);
-            List<WebElement> listRate = checkDoneListBy(By.className("arco-tag-checkable"), "Rate");
-            if (listRate.size() == 7) {
+            List<WebElement> listRate = checkDoneListBy(By.className("arco-tag-checkable"), "Rate",false);
+            int size = listRate.size();
+            print("Action Star: " + size);
+            if (size == 7) {
                 // 1-5: star
                 // 6: đang chờ trả lời, 7 đã trả lời
-                int starIndex = 4;
+                int starIndex = 0;
                 WebElement waitingFeedback = listRate.get(5);
                 waitingFeedback.click();
                 delayBetween(3, 5);
                 while (starIndex < 5) {
-//                    if (starIndex > 0) {
-//                        listRate.get(starIndex - 1).click();
-//                        delayBetween(3, 5);
-//                        print("Bỏ chọn " + (starIndex) + " sao");
-//                    }
+                    if (starIndex > 0) {
+                        listRate.get(starIndex - 1).click();
+                        delayBetween(3, 5);
+                        print("Bỏ chọn " + (starIndex) + " sao");
+                    }
                     WebElement elementStar = listRate.get(starIndex);
                     elementStar.click();
-                    print("Chọn " + (starIndex + 1) + " sao");
+                    currentStar = (starIndex + 1);
+                    print("Chọn " + currentStar + " sao");
                     delayBetween(3, 5);
-                    checkListRate(starIndex + 1);
+                    checkListRate(currentStar);
                     starIndex++;
                 }
+                print("HOÀN THÀNH PHẢN HỒI");
             }
-
         } catch (InterruptedException e) {
             printException(e);
         }
@@ -73,8 +84,10 @@ class TiktokFeedbackRateTask extends BaseWebViewTask {
             List<WebElement> feedbackElements = checkDoneListBy(By.xpath("//div[contains(text(), 'Phản hồi')]"), "Rate List");
             List<WebElement> ordersDetail = new ArrayList<>();
             int size = feedbackElements.size();
+            String content = "";
             if (start <= 2) {
-                ordersDetail = checkDoneListBy(By.xpath("//div[contains(@class, 'copyIcon')]"), "CopyOrderId");
+                content = messageNotGood;
+                ordersDetail = checkDoneListBy(By.xpath("//div[contains(@class, 'productItemInfoOrderIdText')]"), "CopyOrderId");
                 if (ordersDetail.size() != size) {
                     ScreenshotFullModel.screenShotFull(webDriver, "FeedbackNotEqualOrder");
                     throw new InterruptedException("List phản hồi không bằng list đơn hàng");
@@ -82,22 +95,13 @@ class TiktokFeedbackRateTask extends BaseWebViewTask {
             }
             print(size + " đơn hàng chưa phản hồi");
             int count = 0;
-            String content = "";
-            if (start <= 2) {
-                content = "Chào bạn không biết là sản phẩm bên mình có vấn đề gì? Mong bạn phản hồi lại giúp shop trong phần tin nhắn để shop giải quyết cho mình nhé.";
-            }
+
             while (count < size) {
                 try {
                     if (start <= 2) {
                         print("Gửi chat cho khách hàng đánh giá " + start + " sao");
                         WebElement orderDetail = ordersDetail.get(count);
-                        orderDetail.click();
-                        if (SystemUtils.IS_OS_WINDOWS) {
-                            webDriver.findElement(By.cssSelector("body")).sendKeys(Keys.CONTROL + "t");
-                        } else {
-                            webDriver.findElement(By.cssSelector("body")).sendKeys(Keys.COMMAND + "t");
-                        }
-
+                        sendChatBuyerRateNotGood(orderDetail);
                     }
 
                     WebElement feedbackAt = feedbackElements.get(count);
@@ -115,7 +119,7 @@ class TiktokFeedbackRateTask extends BaseWebViewTask {
                     } else {
                         simulateSendKeys(textArea, content);
                     }
-                    print("Gửi chat thứ " + count + 1);
+                    print("Gửi chat thứ " + (count + 1));
                     delayBetween(2, 3);
                     buttonSend.click();
                     delayBetween(3, 5);
@@ -138,6 +142,33 @@ class TiktokFeedbackRateTask extends BaseWebViewTask {
         } else {
             return "Shop cảm ơn phản hồi của bạn. Chúc bạn ngày làm việc vui vẻ =))";
         }
+    }
+
+
+    private void sendChatBuyerRateNotGood(WebElement elementOrder) {
+        String text = elementOrder.getText();
+        String orderId = "";
+        if (text.contains(":")) {
+             orderId = text.split(":")[1];
+        }
+        if(orderId.isEmpty()){
+            printE("Không lấy đuợc orderId");
+            return;
+        }
+        elementOrder.click();
+        delayBetween(1,3);
+        ArrayList<String> tabs = new ArrayList<>(webDriver.getWindowHandles());
+        if (tabs.size() == 1) {
+            printE("Mở tab chat lỗi");
+            return;
+        }
+        webDriver.switchTo().window(tabs.get(1));
+        if (orderDetailTask == null) {
+            orderDetailTask = new TiktokOrderDetailTask(accountModel, webDriverCallback);
+            orderDetailTask.setWebDriver(webDriver);
+        }
+        orderDetailTask.feedbackRateNotGood(orderId);
+
     }
 
 

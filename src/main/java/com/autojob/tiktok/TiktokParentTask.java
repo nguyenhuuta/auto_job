@@ -50,8 +50,11 @@ public class TiktokParentTask extends TimerTask {
             orderDetailTask.updateListView("Ngoài giờ hoạt động 8h -> 22h");
             return;
         }
-//        orderDetailTask.run();
+        orderDetailTask.run();
         feedbackRating.run();
+
+        String text = "LẦN CHẠY TỚI VÀO: " + TimeUtils.addMinute(10);
+        orderDetailTask.updateListView(text);
     }
 
 

@@ -827,6 +827,9 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     }
 
     public List<WebElement> checkDoneListBy(By by, String tag) throws InterruptedException {
+        return checkDoneListBy(by,tag,true);
+    }
+    public List<WebElement> checkDoneListBy(By by, String tag, boolean hasEmpty) throws InterruptedException {
         List<WebElement> elements;
         int count = 1;
         do {
@@ -839,8 +842,11 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
             } catch (Exception ignore) {
                 elements = null;
             }
+            if(!hasEmpty && elements != null && elements.isEmpty()){
+                elements = null;
+            }
             count++;
-        } while (elements == null || elements.isEmpty());
+        } while (elements == null);
         print(tag + " load done");
         return elements;
     }
