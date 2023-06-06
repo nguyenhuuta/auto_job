@@ -128,9 +128,9 @@ public class HomeController implements Initializable, WebDriverCallback {
                         try {
                             int index = Math.toIntExact(aLong);
                             AccountModel account = tiktoks.get(index);
-                            if (account.shopId == 6) {
-                                return;
-                            }
+//                            if (account.shopId == 6) {
+//                                return;
+//                            }
                             BaseController controller = new TiktokController(account, HomeController.this);
                             controller.runNow();
                             controllers.put(account.shopName, controller);

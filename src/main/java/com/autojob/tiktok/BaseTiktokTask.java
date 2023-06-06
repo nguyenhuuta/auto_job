@@ -21,7 +21,6 @@ abstract class BaseTiktokTask extends BaseWebViewTask {
      * Ẩn popup hỏi "trả lời khách hàng luôn"
      */
     public void hidePopupReplyLate() {
-//        delaySecond(5);
         WebElement popup = getElementByClassName("arco-popover-content");
         if (popup != null) {
             print("Hiển thị popup trả lời tin nhắn");
@@ -48,7 +47,6 @@ abstract class BaseTiktokTask extends BaseWebViewTask {
         load(url);
         List<WebElement> listRate = checkDoneListBy(by, tag, hasEmpty);
         hidePopupReplyLate();
-        print("openUrlByList " + listRate);
         return listRate;
     }
 

@@ -9,13 +9,18 @@ import com.autojob.utils.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
+import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import rx.subjects.PublishSubject;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -41,6 +46,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
 
     public AccountModel accountModel;
     public WebDriverCallback webDriverCallback;
+
 
     public BaseWebViewTask(AccountModel accountModel, WebDriverCallback webDriverCallback) {
         this.accountModel = accountModel;
@@ -70,6 +76,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         } catch (Exception ignored) {
         }
     }
+
 
     public void startWeb() {
         String profilePath = System.getProperty("user.dir") + "/data/chrome_profile/" + accountModel.shopName;
@@ -183,6 +190,18 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
+    public void openNewTab() throws InterruptedException {
+        ArrayList<String> tabs = new ArrayList<>(webDriver.getWindowHandles());
+        int size1 = tabs.size();
+        getJavascriptExecutor().executeScript("window.open()");
+        tabs = new ArrayList<>(webDriver.getWindowHandles());
+        int size2 = tabs.size();
+        if (size1 == size2) {
+            throw new InterruptedException("Mở tab mới lỗi");
+        }
+        webDriver.switchTo().window(tabs.get(size2 - 1));
+    }
+
     protected final void waitDefault() {
         wait(DEFAULT_WAIT_TIME, TimeUnit.MILLISECONDS);
     }
@@ -212,9 +231,14 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     }
 
     protected final void scrollToElement(WebElement element) {
-        if (!isValidTaskInRunning()) return;
         try {
+//            Actions actions = new Actions(webDriver);
+//            actions.moveToElement(element);
+//            actions.perform();
+
+
             getJavascriptExecutor().executeScript("arguments[0].scrollIntoView(true);", element);
+            delayMilliSecond(500);
         } catch (Exception e) {
             Logger.warning(getTag(), e.getClass().getSimpleName() + ": " + e.getMessage());
         }
@@ -414,7 +438,26 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    protected final WebElement getElementByCssSelector(WebElement parentElement, String selector) {
+    public   WebElement getElementBy(WebElement parentElement, By by) {
+        try {
+            return parentElement.findElement(by);
+        } catch (Exception e) {
+            Logger.warning(getTag(), "Not found element : " + by.toString());
+            return null;
+        }
+    }
+
+    public  List<WebElement> getElementsBy(WebElement parentElement, By by) {
+        try {
+            return parentElement.findElements(by);
+        } catch (Exception e) {
+            Logger.warning(getTag(), "Not found element : " + by.toString());
+            return null;
+        }
+    }
+
+
+    public  WebElement getElementByCssSelector(WebElement parentElement, String selector) {
         if (!isValidTaskInRunning()) return null;
         try {
             return parentElement.findElement(By.cssSelector(selector));
@@ -424,7 +467,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    protected final List<WebElement> getElementsByCssSelector(WebElement parentElement, String selector) {
+    protected  List<WebElement> getElementsByCssSelector(WebElement parentElement, String selector) {
         if (!isValidTaskInRunning()) return null;
         try {
             return parentElement.findElements(By.cssSelector(selector));
@@ -434,7 +477,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    protected final List<WebElement> getElementsByCssSelector(String selector) {
+    protected  List<WebElement> getElementsByCssSelector(String selector) {
         if (!isValidTaskInRunning()) return null;
         try {
             return getWebDriver().findElements(By.cssSelector(selector));
@@ -444,7 +487,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    protected final WebElement getElementByCssSelector(String selector) {
+    protected  WebElement getElementByCssSelector(String selector) {
         if (!isValidTaskInRunning()) return null;
         try {
             return getWebDriver().findElement(By.cssSelector(selector));
@@ -473,7 +516,6 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     }
 
     public WebElement getElementByClassName(WebElement parentElement, String className) {
-        if (!isValidTaskInRunning()) return null;
         try {
             return parentElement.findElement(By.className(className));
         } catch (Exception e) {
@@ -510,7 +552,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    protected final WebElement getElementById(WebElement parentElement, String id) {
+    protected WebElement getElementById(WebElement parentElement, String id) {
         if (!isValidTaskInRunning()) return null;
         try {
             return parentElement.findElement(By.id(id));
@@ -520,7 +562,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    protected final List<WebElement> getElementsById(String id) {
+    protected List<WebElement> getElementsById(String id) {
         if (!isValidTaskInRunning()) return null;
         try {
             return getWebDriver().findElements(By.id(id));
@@ -530,7 +572,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    protected final List<WebElement> getElementsByXpath(String xpath) {
+    protected  List<WebElement> getElementsByXpath(String xpath) {
         try {
             return getWebDriver().findElements(By.xpath(xpath));
         } catch (Exception e) {
@@ -539,7 +581,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    protected final WebElement getElementByXpath(WebElement parent, String xpath) {
+    protected  WebElement getElementByXpath(WebElement parent, String xpath) {
         try {
             return parent.findElement(By.xpath(xpath));
         } catch (Exception e) {
@@ -548,7 +590,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    protected final List<WebElement> getElementsById(WebElement parentElement, String id) {
+    protected  List<WebElement> getElementsById(WebElement parentElement, String id) {
         if (!isValidTaskInRunning()) return null;
         try {
             return parentElement.findElements(By.id(id));
@@ -558,7 +600,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    protected final WebElement getElementByName(String name) {
+    protected  WebElement getElementByName(String name) {
         try {
             return getWebDriver().findElement(By.name(name));
         } catch (Exception e) {
@@ -567,7 +609,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    protected final WebElement getElementByName(WebElement parentElement, String name) {
+    protected  WebElement getElementByName(WebElement parentElement, String name) {
         try {
             return parentElement.findElement(By.name(name));
         } catch (Exception e) {
@@ -576,7 +618,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    protected final List<WebElement> getElementsByName(String name) {
+    protected  List<WebElement> getElementsByName(String name) {
         try {
             return getWebDriver().findElements(By.name(name));
         } catch (Exception e) {
@@ -585,7 +627,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    protected final List<WebElement> getElementsByName(WebElement parent, String name) {
+    protected  List<WebElement> getElementsByName(WebElement parent, String name) {
         try {
             return parent.findElements(By.name(name));
         } catch (Exception e) {
@@ -594,7 +636,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    protected final WebElement getElementByTagName(String name) {
+    protected  WebElement getElementByTagName(String name) {
         try {
             return getWebDriver().findElement(By.tagName(name));
         } catch (Exception e) {
@@ -816,8 +858,9 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         WebElement element;
         int count = 1;
         do {
-            if (count == numberRetry) {
-                throw new InterruptedException(tag + " Hết số lần thử");
+            if (count > numberRetry) {
+                printE("CheckDoneBy: " + tag + " Hết số lần thử");
+                playSoundError();
             }
             delaySecond(2);
             try {
@@ -840,9 +883,10 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         int count = 1;
         do {
             if (count == numberRetry) {
-                throw new InterruptedException(tag + " Hết số lần thử");
+                printE("CheckDoneListBy: " + tag + " Hết số lần thử");
+                playSoundError();
             }
-            delaySecond(2);
+            delaySecond(10);
             try {
                 elements = webDriver.findElements(by);
             } catch (Exception ignore) {
@@ -876,19 +920,34 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
 //    }
 
     public void playSoundError() {
-        try {
-            URL url = this.getClass().getResource("/bip2.mp3");
-            System.out.println("Resource URL two is = " + url);
-            Media hit = new Media(url.toExternalForm());
-            MediaPlayer mediaPlayer = new MediaPlayer(hit);
-            mediaPlayer.play();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        App.getInstance().playSound();
     }
 
     public WebElement waitUntilElementIsVisible(By identifier) {
         WebElement element = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(identifier));
         return element;
+    }
+    public void screenShotFull(String nameFile) {
+        try {
+            String pathSaveImage = System.getProperty("user.dir") + "/data/capture/" + nameFile + "_" + System.currentTimeMillis() + ".jpg";
+            webDriver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
+            TakesScreenshot s = (TakesScreenshot) webDriver;
+            File source = s.getScreenshotAs(OutputType.FILE);
+            FileUtils.copyFile(source, new File(pathSaveImage));
+            printE("ScreenShot " +  pathSaveImage);
+        } catch (Exception e) {
+            printException(e);
+        }
+    }
+
+    public void screenShotBy(WebElement element,String nameFile){
+        try {
+            String pathSaveImage = System.getProperty("user.dir") + "/data/capture/" + nameFile + "_" + System.currentTimeMillis() + ".jpg";
+            File source = element.getScreenshotAs(OutputType.FILE);
+            FileUtils.copyFile(source, new File(pathSaveImage));
+            printE("ScreenShot " +  pathSaveImage);
+        } catch (IOException e) {
+            printException(e);
+        }
     }
 }

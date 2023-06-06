@@ -8,15 +8,22 @@ import com.autojob.utils.WebDriverUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.SystemUtils;
 import org.openqa.selenium.chrome.ChromeDriverService;
+import rx.Observable;
+import rx.functions.Action1;
+import rx.subjects.PublishSubject;
 
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class App extends Application {
     public static boolean debug = true;
@@ -35,6 +42,8 @@ public class App extends Application {
         App.instance = app;
     }
 
+    PublishSubject<Boolean> triggerPlaySound = PublishSubject.create();
+
     static {
         DatabaseHelper.getInstance();
     }
@@ -48,6 +57,7 @@ public class App extends Application {
             Utils.grantFilePermission(webDriver);
             System.setProperty(ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY, userDir + "/ChromeMac/chromedriver");
         }
+
     }
 
     public static void main(String[] args) {
@@ -59,6 +69,27 @@ public class App extends Application {
         launch(args);
     }
 
+
+
+    boolean playingSound = false;
+
+   public void playSound() {
+        if (playingSound) {
+            return;
+        }
+        playingSound = true;
+       try {
+           URL url = this.getClass().getResource("/bip2.mp3");
+           Media hit = new Media(url.toExternalForm());
+           MediaPlayer mediaPlayer = new MediaPlayer(hit);
+           mediaPlayer.play();
+       } catch (Exception e) {
+           e.printStackTrace();
+       }
+        Observable.just(1).zipWith(Observable.interval(10, TimeUnit.SECONDS), (item, interval) -> item)
+                .subscribe(integer -> playingSound = false);
+
+    }
 
     private Stage mStage;
     private boolean startApp;

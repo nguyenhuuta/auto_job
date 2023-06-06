@@ -72,7 +72,7 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
      * Cập nhật SĐT, sendThanks vào đơn hàng
      */
     public void updateOrderToServer() {
-        if (jsonArray.isEmpty()) {
+        if (jsonArray.isEmpty() || type == 3) {
             return;
         }
         log("Data gửi lên server " + jsonArray);
@@ -116,6 +116,7 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
      */
     public void feedbackRateNotGood(String orderId) {
         type = 3;
+        orderIds.clear();
         orderIds.add(orderId);
         openOrderDetail();
     }
@@ -126,18 +127,12 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
         while (index < size) {
             try {
                 String orderId = orderIds.get(index);
-                WebElement chatIcon;
-                if (type != 3) {
-                    String currentIndex = (index + 1) + "/" + size;
-                    String format = String.format("============ %s| %s ============", currentIndex, orderId);
-                    print(format);
-                    String url = String.format(urlDetail, TiktokParentTask.ENDPOINT, orderId);
-                    chatIcon = openUrl(url, By.xpath("//div[contains(@class, 'IMICon__IMIconBackground')]"), "Icon Chat");
-                } else {
-                    // được mở khi click vào phản hồi của khách hàng
-                    chatIcon = checkDoneBy(By.xpath("//div[contains(@class, 'IMICon__IMIconBackground')]"), "Icon Chat");
-                    hidePopupReplyLate();
-                }
+                String currentIndex = (index + 1) + "/" + size;
+                String format = String.format("============ %s| %s ============", currentIndex, orderId);
+                print(format);
+                String url = String.format(urlDetail, TiktokParentTask.ENDPOINT, orderId);
+                WebElement chatIcon = openUrl(url, By.xpath("//div[contains(@class, 'IMICon__IMIconBackground')]"), "Icon Chat");
+
                 delaySecond(2);
                 switch (type) {
                     case 1: // Lấy SĐT
@@ -195,23 +190,28 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
 
 
     private void sendChat() {
+        if (type == 3) {
+            int count = 0;
+            while (count < 3) {
+                ArrayList<String> tabs = new ArrayList<>(webDriver.getWindowHandles());
+                count = tabs.size();
+                log("count" + count);
+                delaySecond(1);
+                if (count == 3) {
+                    webDriver.switchTo().window(tabs.get(1));
+                    webDriver.close();
+                }
+            }
+        }
+
         try {
             delaySecond(5);
             ArrayList<String> tabs = new ArrayList<>(webDriver.getWindowHandles());
-            if (type == 2) {
-                if (tabs.size() != 2) {
-                    throw new InterruptedException("Mở tab chat lỗi");
-                }
-                webDriver.switchTo().window(tabs.get(1));
-            } else if (type == 3) {
-                if (tabs.size() != 3) {
-                    throw new InterruptedException("Mở tab chat lỗi");
-                }
-                webDriver.close();
-                delaySecond(1);
-                tabs = new ArrayList<>(webDriver.getWindowHandles());
-                webDriver.switchTo().window(tabs.get(1));
+            if (tabs.size() != 2) {
+                throw new InterruptedException("Mở tab chat lỗi");
             }
+            webDriver.switchTo().window(tabs.get(1));
+            print("2 " + webDriver.getCurrentUrl());
 
             String[] array = message();
             WebElement textArea = checkDoneBy(By.xpath("//*[@id='chat-input-textarea']/textarea"), "ChatInput");
@@ -221,18 +221,19 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
             if (type != 3 && listContent != null && listContent.size() > 3) {
                 printColor("[SKIP]Khách hàng đang có cuộc trò chuyện với shop, bỏ qua đơn hàng ", Color.BLUE);
             } else {
-                for (String value : array) {
-                    textArea.sendKeys(value);
-                    textArea.sendKeys(Keys.SHIFT, Keys.ENTER);
-                }
-                textArea.sendKeys(Keys.ENTER);
-                print("Gửi chat thành công");
-                delayBetween(5, 10);
+//                for (String value : array) {
+//                    textArea.sendKeys(value);
+//                    textArea.sendKeys(Keys.SHIFT, Keys.ENTER);
+//                }
+//                textArea.sendKeys(Keys.ENTER);
+//                print("Gửi chat thành công");
+//                delayBetween(5, 10);
             }
             webDriver.close();
             webDriver.switchTo().window(tabs.get(0));
             print("Tắt chat");
-            delayBetween(10, 20);
+
+//            delayBetween(10, 20);
 
         } catch (Exception exception) {
             printException(exception);
