@@ -245,7 +245,6 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     }
 
     protected final void scrollBy(int y) {
-        if (!isValidTaskInRunning()) return;
         try {
             print("scrollBy " + y);
             String scrip = String.format("window.scrollBy(%o,%o)", 0, y);
@@ -934,7 +933,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
             TakesScreenshot s = (TakesScreenshot) webDriver;
             File source = s.getScreenshotAs(OutputType.FILE);
             FileUtils.copyFile(source, new File(pathSaveImage));
-            printE("ScreenShot " +  pathSaveImage);
+            print("ScreenShot " +  pathSaveImage);
         } catch (Exception e) {
             printException(e);
         }
@@ -945,7 +944,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
             String pathSaveImage = System.getProperty("user.dir") + "/data/capture/" + nameFile + "_" + System.currentTimeMillis() + ".jpg";
             File source = element.getScreenshotAs(OutputType.FILE);
             FileUtils.copyFile(source, new File(pathSaveImage));
-            printE("ScreenShot " +  pathSaveImage);
+            print("ScreenShot " +  pathSaveImage);
         } catch (IOException e) {
             printException(e);
         }

@@ -40,7 +40,7 @@ public class TiktokParentTask extends TimerTask {
         this.accountModel = accountModel;
         this.webDriverCallback = callback;
         orderDetailTask = new TiktokOrderDetailTask(accountModel, webDriverCallback);
-        feedbackRating = new TiktokFeedbackRateTask(accountModel, webDriverCallback);
+//        feedbackRating = new TiktokFeedbackRateTask(accountModel, webDriverCallback);
         feedbackRating2 = new TiktokFeedbackRateTask2(accountModel, webDriverCallback);
     }
 
@@ -53,9 +53,7 @@ public class TiktokParentTask extends TimerTask {
             return;
         }
         orderDetailTask.run();
-//        feedbackRating.run();
         feedbackRating2.run();
-
         String text = "LẦN CHẠY TỚI VÀO: " + TimeUtils.addMinute(10);
         orderDetailTask.updateListView(text);
     }

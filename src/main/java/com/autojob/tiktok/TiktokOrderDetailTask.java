@@ -72,7 +72,7 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
      * Cập nhật SĐT, sendThanks vào đơn hàng
      */
     public void updateOrderToServer() {
-        if (jsonArray.isEmpty() || type == 3) {
+        if (jsonArray.isEmpty()) {
             return;
         }
         log("Data gửi lên server " + jsonArray);
@@ -84,6 +84,7 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
             jsonArray.clear();
         } catch (InterruptedException e) {
             e.printStackTrace();
+            printE("updateOrderToServer lỗi");
         }
     }
 
@@ -157,7 +158,7 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
                         break;
                 }
                 print("============ END ============");
-                if (jsonArray.size() == 30) {
+                if (jsonArray.size() == 10) {
                     updateOrderToServer();
                 }
             } catch (Exception e) {
@@ -221,19 +222,18 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
             if (type != 3 && listContent != null && listContent.size() > 3) {
                 printColor("[SKIP]Khách hàng đang có cuộc trò chuyện với shop, bỏ qua đơn hàng ", Color.BLUE);
             } else {
-//                for (String value : array) {
-//                    textArea.sendKeys(value);
-//                    textArea.sendKeys(Keys.SHIFT, Keys.ENTER);
-//                }
-//                textArea.sendKeys(Keys.ENTER);
-//                print("Gửi chat thành công");
-//                delayBetween(5, 10);
+                for (String value : array) {
+                    textArea.sendKeys(value);
+                    textArea.sendKeys(Keys.SHIFT, Keys.ENTER);
+                }
+                textArea.sendKeys(Keys.ENTER);
+                print("Gửi chat thành công");
+                delayBetween(5, 10);
             }
             webDriver.close();
             webDriver.switchTo().window(tabs.get(0));
             print("Tắt chat");
-
-//            delayBetween(10, 20);
+            delayBetween(10, 20);
 
         } catch (Exception exception) {
             printException(exception);

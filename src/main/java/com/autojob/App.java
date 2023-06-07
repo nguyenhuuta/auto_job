@@ -70,22 +70,22 @@ public class App extends Application {
     }
 
 
-
     boolean playingSound = false;
 
-   public void playSound() {
+    public void playSound() {
+        System.out.println("PlaySound " + playingSound);
         if (playingSound) {
             return;
         }
         playingSound = true;
-       try {
-           URL url = this.getClass().getResource("/bip2.mp3");
-           Media hit = new Media(url.toExternalForm());
-           MediaPlayer mediaPlayer = new MediaPlayer(hit);
-           mediaPlayer.play();
-       } catch (Exception e) {
-           e.printStackTrace();
-       }
+        try {
+            URL url = this.getClass().getResource("/bip2.mp3");
+            Media hit = new Media(url.toExternalForm());
+            MediaPlayer mediaPlayer = new MediaPlayer(hit);
+            mediaPlayer.play();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         Observable.just(1).zipWith(Observable.interval(10, TimeUnit.SECONDS), (item, interval) -> item)
                 .subscribe(integer -> playingSound = false);
 

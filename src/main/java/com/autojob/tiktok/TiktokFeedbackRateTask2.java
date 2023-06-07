@@ -37,27 +37,36 @@ class TiktokFeedbackRateTask2 extends BaseTiktokTask {
     @Override
     public void run() {
         try {
-            load(URL_RATE);
-            //Đang chờ trả lời
-            WebElement waitingReply = checkDoneBy(By.xpath("//span[contains(text(), 'Đang chờ trả lời')]"), "Button 'Đang chờ trả lời'");
-            if (waitingReply == null) {
-                print("Đang chờ trả lời: NULL");
-                return;
+            List<WebElement> listRate = openUrlByList(URL_RATE, By.className("arco-tag-checkable"), "STAR LIST", false);
+            if (listRate.size() != 7) {
+                throw new InterruptedException("Size != 7");
             }
+            WebElement start3 = listRate.get(2);
+            start3.click();
+            delayMilliSecond(400);
+            WebElement start4 = listRate.get(3);
+            start4.click();
+            delayMilliSecond(400);
+            WebElement start5 = listRate.get(4);
+            start5.click();
+            delayMilliSecond(400);
+            WebElement waitingReply = listRate.get(5);
             waitingReply.click();
+            delayMilliSecond(400);
             List<WebElement> listRating = checkDoneListBy(By.xpath("//div[contains(@class, 'ratingListItem')]"), "Rate");
-            List<WebElement> listOrderId = getElementsByXpath( "//div[contains(@class, 'productItemInfoOrderIdText')]");
-            List<WebElement> stars = getElementsByXpath( "//div[contains(@class, 'ratingStar')]");
+            List<WebElement> listOrderId = getElementsByXpath("//div[contains(@class, 'productItemInfoOrderIdText')]");
+            List<WebElement> stars = getElementsByXpath("//div[contains(@class, 'ratingStar')]");
             hidePopupReplyLate();
             int size = listRating.size();
             int sizeOrder = listOrderId.size();
             int sizeStar = stars.size();
-            if(size != sizeOrder || size != sizeStar){
+            if (size != sizeOrder || size != sizeStar) {
                 throw new InterruptedException("Size List không bằng nhau");
             }
             print("Có: " + size + " đánh giá chưa phản hồi");
             int count = 0;
             while (count < size) {
+                print("count " + count);
                 try {
                     WebElement itemRating = listRating.get(count);
                     WebElement containerStart = stars.get(count);
@@ -72,18 +81,13 @@ class TiktokFeedbackRateTask2 extends BaseTiktokTask {
                             break;
                         }
                     }
-                    print("=======>Phản hồi " + countStart +" sao -" +orderId.getText() + "<=======");
+                    print("=======>Phản hồi " + countStart + " sao -" + orderId.getText() + "<=======");
                     WebElement buttonFeedback = getElementBy(itemRating, By.xpath("//div[contains(text(), 'Phản hồi')]"));
                     if (buttonFeedback == null) {
                         throw new InterruptedException("Button Feedback IS NULL");
                     }
                     sendFeedback(buttonFeedback, countStart);
                     print("Gửi phản hồi thứ " + (count + 1));
-                    delayBetween(3, 5);
-                    if (countStart <= 2) {
-                        //TODO send push here
-                        sendChatBuyerRateNotGood(orderId);
-                    }
                 } catch (Exception e) {
                     playSoundError();
                     printException(e);
@@ -130,46 +134,70 @@ class TiktokFeedbackRateTask2 extends BaseTiktokTask {
         try {
             buttonFeedback.click();
             WebElement dialog = checkDoneBy(By.className("arco-modal-content"), "DialogFeedback");
-            WebElement textArea = getElementByTagName(dialog, "textarea");
+            List<WebElement> textAreas = getElementsByTagName(dialog, "textarea");
             WebElement buttonSend = getElementByXpath("//span[contains(text(), 'Gửi')]");
-            if (textArea == null || buttonSend == null) {
+            if (buttonSend == null) {
                 screenShotFull("SendFeedback");
                 playSoundError();
                 return;
             }
             delaySecond(1);
             String content;
-            if (start <= 2) {
-                content = messageNotGood;
+            int size = textAreas.size();
+            if (size == 1) {
+                if (start <= 2) {
+                    content = messageNotGood;
+                } else {
+                    content = randomFeedbackGood();
+                }
+                int random = Utils.randomInteger(0, 1);
+                WebElement textArea = textAreas.get(0);
+                if (random == 0) {
+                    textArea.sendKeys(content);
+                } else {
+                    simulateSendKeys(textArea, content);
+                }
             } else {
-                content = randomFeedbackGood();
-            }
-            int random = Utils.randomInteger(0, 1);
-            if (random == 0) {
-                textArea.sendKeys(content);
-            } else {
-                simulateSendKeys(textArea, content);
+                print("Đơn hàng có " +size + " đánh giá");
+                int count = 0;
+                while (count < size) {
+                    content = feedbackContent(count);
+                    WebElement textArea = textAreas.get(count);
+                    int random = Utils.randomInteger(0, 1);
+                    if (random == 0) {
+                        textArea.sendKeys(content);
+                    } else {
+                        simulateSendKeys(textArea, content);
+                    }
+                    count++;
+                }
             }
             delayBetween(2, 3);
             buttonSend.click();
+            delayBetween(2,4);
         } catch (Exception e) {
             printException(e);
             WebElement buttonCancel = getElementByXpath("//span[contains(text(), 'Hủy')]");
             if (buttonCancel != null) {
                 buttonCancel.click();
             }
-
         }
     }
 
     private String randomFeedbackGood() {
         int random = Utils.randomInteger(0, 2);
+        return feedbackContent(random);
+    }
+
+    private String feedbackContent(int random) {
         if (random == 0) {
             return "Shop cảm ơn sự ủng hộ của bạn ạ. Mong là bạn sẽ tiếp tục theo dõi và ủng hộ shop nha ^^";
         } else if (random == 1) {
             return "Shop cảm ơn đánh giá của bạn. Hy vọng bạn sẽ giới thiệu bạn bè đến với shop nữa nha ^^";
-        } else {
+        } else if (random == 2) {
             return "Shop cảm ơn phản hồi của bạn. Chúc bạn ngày làm việc vui vẻ =))";
+        } else {
+            return random + ".Shop cảm ơn bạn nha ^^";
         }
     }
 
