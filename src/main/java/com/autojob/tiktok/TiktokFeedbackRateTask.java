@@ -2,11 +2,15 @@ package com.autojob.tiktok;
 
 import com.autojob.base.WebDriverCallback;
 import com.autojob.model.entities.AccountModel;
+import com.autojob.utils.TimeUtils;
 import com.autojob.utils.Utils;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
 import java.util.List;
+
+import static com.autojob.utils.TimeUtils.formatDate2;
 
 /**
  * Created by OpenYourEyes on 03/06/2023
@@ -35,22 +39,39 @@ class TiktokFeedbackRateTask extends BaseTiktokTask {
             if (listRate.size() != 7) {
                 throw new InterruptedException("Size != 7");
             }
-            WebElement start3 = listRate.get(2);
-            start3.click();
+            //star 3
+            listRate.get(2).click();
             delayMilliSecond(400);
-            WebElement start4 = listRate.get(3);
-            start4.click();
+            //star 4
+            listRate.get(3).click();
             delayMilliSecond(400);
-            WebElement start5 = listRate.get(4);
-            start5.click();
+            //star 5
+            listRate.get(4).click();
             delayMilliSecond(400);
-            WebElement waitingReply = listRate.get(5);
-            waitingReply.click();
+            // button chưa trả lời
+            listRate.get(5).click();
             delayMilliSecond(400);
+            checkDoneListBy(By.xpath("//div[contains(@class, 'ratingListItem')]"), "Rate");
+            hidePopupReplyLate();
+
+            List<WebElement> rangeDate = getElementsByXpath("//input[@placeholder='Từ' or @placeholder='Đến']");
+            if (rangeDate != null && rangeDate.size() == 2) {
+                String date = TimeUtils.getCurrentDate(formatDate2);
+                WebElement start = rangeDate.get(0);
+                start.sendKeys(date);
+                delayBetween(1, 2);
+                start.sendKeys(Keys.ENTER);
+                delayBetween(1, 2);
+                WebElement end = rangeDate.get(1);
+                end.sendKeys(date);
+                delayBetween(1, 2);
+                end.sendKeys(Keys.ENTER);
+                delayBetween(1, 2);
+            }
+
             List<WebElement> listRating = checkDoneListBy(By.xpath("//div[contains(@class, 'ratingListItem')]"), "Rate");
             List<WebElement> listOrderId = getElementsByXpath("//div[contains(@class, 'productItemInfoOrderIdText')]");
             List<WebElement> stars = getElementsByXpath("//div[contains(@class, 'ratingStar')]");
-            hidePopupReplyLate();
             int size = listRating.size();
             int sizeOrder = listOrderId.size();
             int sizeStar = stars.size();

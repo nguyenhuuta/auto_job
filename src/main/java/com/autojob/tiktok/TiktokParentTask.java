@@ -64,7 +64,6 @@ public class TiktokParentTask extends TimerTask {
         }
 
         webDriverCallback.expiredCookie(accountModel);
-
         orderDetailTask.run();
         feedbackRating.run();
         String text = "LẦN CHẠY TỚI VÀO: " + TimeUtils.addMinute(10);

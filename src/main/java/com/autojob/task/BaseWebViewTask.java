@@ -523,7 +523,6 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     }
 
     public List<WebElement> getElementsByClassName(String className) {
-        if (!isValidTaskInRunning()) return null;
         try {
             return getWebDriver().findElements(By.className(className));
         } catch (Exception e) {
