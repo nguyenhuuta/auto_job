@@ -8,14 +8,16 @@ import com.autojob.task.BaseWebViewTask;
 import com.autojob.utils.Logger;
 import com.autojob.utils.TimeUtils;
 import com.autojob.utils.WebDriverUtils;
+import com.sun.corba.se.impl.orbutil.ObjectWriter;
 import javafx.scene.paint.Color;
+import jdk.nashorn.internal.parser.JSONParser;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.util.Calendar;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -30,7 +32,6 @@ public class TiktokParentTask extends TimerTask {
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     BaseWebViewTask orderDetailTask;
     BaseWebViewTask feedbackRating;
-    BaseWebViewTask feedbackRating2;
 
 
     private final AccountModel accountModel;
@@ -40,8 +41,7 @@ public class TiktokParentTask extends TimerTask {
         this.accountModel = accountModel;
         this.webDriverCallback = callback;
         orderDetailTask = new TiktokOrderDetailTask(accountModel, webDriverCallback);
-//        feedbackRating = new TiktokFeedbackRateTask(accountModel, webDriverCallback);
-        feedbackRating2 = new TiktokFeedbackRateTask2(accountModel, webDriverCallback);
+        feedbackRating = new TiktokFeedbackRateTask(accountModel, webDriverCallback);
     }
 
     @Override
@@ -52,8 +52,21 @@ public class TiktokParentTask extends TimerTask {
             orderDetailTask.updateListView("Ngoài giờ hoạt động 8h -> 22h");
             return;
         }
+        if(accountModel.expired == null){
+            Set<Cookie> cookieSet = orderDetailTask.webDriver.manage().getCookies();
+            for (Cookie cookie : cookieSet) {
+                String code = cookie.getName();
+                if ("sso_uid_tt_ss_ads".equals(code)) {
+                    accountModel.expired = cookie.getExpiry();
+                    break;
+                }
+            }
+        }
+
+        webDriverCallback.expiredCookie(accountModel);
+
         orderDetailTask.run();
-        feedbackRating2.run();
+        feedbackRating.run();
         String text = "LẦN CHẠY TỚI VÀO: " + TimeUtils.addMinute(10);
         orderDetailTask.updateListView(text);
     }
@@ -66,7 +79,6 @@ public class TiktokParentTask extends TimerTask {
         orderDetailTask.print("Start CHROME");
         orderDetailTask.setWebDriver(webDriver);
         feedbackRating.setWebDriver(webDriver);
-        feedbackRating2.setWebDriver(webDriver);
         checkLogin();
     }
 

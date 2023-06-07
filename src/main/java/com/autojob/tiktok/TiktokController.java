@@ -19,7 +19,8 @@ public class TiktokController extends BaseController {
 
     @Override
     public void runNow() {
-        task.startWeb();
+        new Thread(() -> task.startWeb()).start();
+
     }
 
     @Override

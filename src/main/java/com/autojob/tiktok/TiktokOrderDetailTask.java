@@ -212,7 +212,6 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
                 throw new InterruptedException("Mở tab chat lỗi");
             }
             webDriver.switchTo().window(tabs.get(1));
-            print("2 " + webDriver.getCurrentUrl());
 
             String[] array = message();
             WebElement textArea = checkDoneBy(By.xpath("//*[@id='chat-input-textarea']/textarea"), "ChatInput");

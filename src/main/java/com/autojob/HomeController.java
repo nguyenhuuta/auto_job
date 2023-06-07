@@ -24,6 +24,8 @@ import javafx.util.Callback;
 import retrofit2.Call;
 import rx.Observable;
 import rx.Observer;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 import java.net.URL;
 import java.util.*;
@@ -112,7 +114,17 @@ public class HomeController implements Initializable, WebDriverCallback {
         int numberAccounts = tiktoks.size();
         Observable.interval(0, 5, TimeUnit.SECONDS)
                 .takeWhile(number -> number < numberAccounts)
-                .subscribe(new Observer<Long>() {
+                .map(aLong -> {
+                    int index = Math.toIntExact(aLong);
+                    AccountModel account = tiktoks.get(index);
+                    Button button = new Button(account.buttonName());
+                    button.setUserData(account.shopName);
+                    button.setOnAction(event1 -> controllers.get(account.shopName).bringDriverToFront());
+                    buttonMapChrome.put(account.rowId, button);
+                    Platform.runLater(()-> actionTiktok.getChildren().add(button));
+                    return account;
+                })
+                .subscribe(new Observer<AccountModel>() {
                     @Override
                     public void onCompleted() {
                         Logger.info("Khởi tạo hoàn tất");
@@ -124,23 +136,15 @@ public class HomeController implements Initializable, WebDriverCallback {
                     }
 
                     @Override
-                    public void onNext(Long aLong) {
+                    public void onNext(AccountModel account) {
                         try {
-                            int index = Math.toIntExact(aLong);
-                            AccountModel account = tiktoks.get(index);
-//                            if (account.shopId == 6) {
+//                            if (account.shopId == 2) {
 //                                return;
 //                            }
                             BaseController controller = new TiktokController(account, HomeController.this);
+                            controllers.put(account.shopName,controller);
                             controller.runNow();
-                            controllers.put(account.shopName, controller);
-                            Button button = new Button(account.shopName);
-                            button.setUserData(account.shopName);
-                            button.setOnAction(event -> controllers.get(account.shopName).bringDriverToFront());
-                            buttonMapChrome.put(account.rowId, button);
-                            Platform.runLater(() -> {
-                                actionTiktok.getChildren().add(button);
-                            });
+
                         } catch (Exception ig) {
                             ig.printStackTrace();
                         }
@@ -169,7 +173,7 @@ public class HomeController implements Initializable, WebDriverCallback {
             } else if (type == 2) { //Tiktok
                 Button button = buttonMapChrome.get(shop.rowId);
                 if (button == null) {
-                    Logger.error("Button is NULL");
+                    Logger.error("TriggerLogin", "Button is NULL " + shop.shopName);
                     return;
                 }
                 if (needLogin) {
@@ -182,5 +186,20 @@ public class HomeController implements Initializable, WebDriverCallback {
             }
         });
 
+    }
+
+    @Override
+    public void expiredCookie(AccountModel shop) {
+        Platform.runLater(() -> {
+            Button button = buttonMapChrome.get(shop.rowId);
+            Logger.info("ExpiredCookie", shop.shopName);
+            if (button == null) {
+                Logger.error("expiredCookie", "Button is NULL " + shop.shopName);
+                return;
+            }
+            String text = shop.buttonName();
+            Logger.info("buttonName", text);
+            button.setText(text);
+        });
     }
 }

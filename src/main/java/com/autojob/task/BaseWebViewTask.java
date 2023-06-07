@@ -147,7 +147,6 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     public void waitLoadDone() {
         webDriverWait.until((ExpectedCondition<Boolean>) wd ->
                 ((JavascriptExecutor) wd).executeScript("return document.readyState").equals("complete"));
-        print("Mở trang: " + webDriver.getCurrentUrl());
     }
 
     protected WebDriver getWebDriver() {
