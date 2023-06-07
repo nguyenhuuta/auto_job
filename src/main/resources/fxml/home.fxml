@@ -34,8 +34,9 @@
                                     <VBox fx:id="containerTiktok" layoutX="67.0" layoutY="35.0" prefHeight="100.0"
                                           prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                                           AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                        <ListView fx:id="accountTiktok" VBox.vgrow="ALWAYS"/>
-                                        <HBox fx:id="actionTiktok" fillHeight="false" prefHeight="35.0"
+<!--                                        <ListView fx:id="accountTiktok" VBox.vgrow="ALWAYS"/>-->
+                                        <HBox fx:id="tiktokListView" VBox.vgrow="ALWAYS"/>
+                                        <HBox fx:id="tiktokAccount" fillHeight="false" prefHeight="35.0"
                                               spacing="20"
                                               style="-fx-background-color: linear-gradient(to left, #FF7449, #4A0CAE)"
                                               alignment="CENTER_LEFT"/>

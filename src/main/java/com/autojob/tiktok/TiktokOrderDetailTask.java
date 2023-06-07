@@ -157,7 +157,6 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
                         jsonArray.add(bodyThanks);
                         break;
                 }
-                print("============ END ============");
                 if (jsonArray.size() == 10) {
                     updateOrderToServer();
                 }

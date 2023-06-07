@@ -10,7 +10,7 @@ import java.util.Date;
  */
 
 public interface WebDriverCallback {
-    void updateListView(int type, MessageListView message);
+    void updateListView(AccountModel accountModel, MessageListView message);
 
     void triggerLogin(AccountModel accountModel, boolean needLogin);
 

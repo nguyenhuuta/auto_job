@@ -81,7 +81,6 @@ class TiktokFeedbackRateTask extends BaseTiktokTask {
                         throw new InterruptedException("Button Feedback IS NULL");
                     }
                     sendFeedback(buttonFeedback, countStart);
-                    print("Gửi phản hồi thứ " + (count + 1));
                 } catch (Exception e) {
                     playSoundError();
                     printException(e);
@@ -138,6 +137,7 @@ class TiktokFeedbackRateTask extends BaseTiktokTask {
             delaySecond(1);
             String content;
             int size = textAreas.size();
+            print("Nhập nội dung phản hồi");
             if (size == 1) {
                 if (start <= 2) {
                     content = messageNotGood;
@@ -168,6 +168,7 @@ class TiktokFeedbackRateTask extends BaseTiktokTask {
             }
             delayBetween(2, 3);
             buttonSend.click();
+            print("Gửi phản hồi thành công");
             delayBetween(2, 4);
         } catch (Exception e) {
             printException(e);

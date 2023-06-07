@@ -12,23 +12,22 @@ import com.autojob.utils.Logger;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TabPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.util.Callback;
 import retrofit2.Call;
 import rx.Observable;
 import rx.Observer;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
 
+import java.awt.*;
 import java.net.URL;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -41,11 +40,14 @@ public class HomeController implements Initializable, WebDriverCallback {
 
 
     public VBox containerTiktok;
-    public ListView<MessageListView> accountTiktok;
-    public HBox actionTiktok;
+    //    public ListView<MessageListView> accountTiktok;
+    public HBox tiktokListView;
+    public HBox tiktokAccount;
     public ListView<String> needLogin;
     private final Map<String, BaseController> controllers = new HashMap<>();
     private final Map<String, Button> buttonMapChrome = new HashMap<>();
+    private final Map<String, ListView<MessageListView>> mapListView = new HashMap<>();
+
     List<AccountModel> shopees = new ArrayList<>();
     List<AccountModel> tiktoks = new ArrayList<>();
 
@@ -89,24 +91,34 @@ public class HomeController implements Initializable, WebDriverCallback {
     }
 
     private void createViewTiktok() {
-        accountTiktok.setCellFactory(new Callback<ListView<MessageListView>, ListCell<MessageListView>>() {
-            @Override
-            public ListCell<MessageListView> call(ListView<MessageListView> param) {
-                return new ListCell<MessageListView>() {
-                    @Override
-                    protected void updateItem(MessageListView item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (item == null) {
-                            setText(null);
-                            setTextFill(null);
-                        } else {
-                            setText(item.message);
-                            setTextFill(item.color);
+        for (AccountModel account : tiktoks) {
+            ListView<MessageListView> listViewTiktok = new ListView<>();
+            tiktokListView.getChildren().add(listViewTiktok);
+            HBox.setHgrow(listViewTiktok, Priority.ALWAYS);
+            mapListView.put(account.shopName, listViewTiktok);
+            listViewTiktok.setCellFactory(new Callback<ListView<MessageListView>, ListCell<MessageListView>>() {
+                @Override
+                public ListCell<MessageListView> call(ListView<MessageListView> param) {
+                    return new ListCell<MessageListView>() {
+                        @Override
+                        protected void updateItem(MessageListView item, boolean empty) {
+                            super.updateItem(item, empty);
+                            if (item == null) {
+                                setText(null);
+                                setTextFill(null);
+                            } else {
+                                setText(item.message);
+                                setTextFill(item.color);
+//                                setStyle("-fx-background-color: blue;");
+//                                BackgroundFill backgroundFill = new BackgroundFill(Color.valueOf("#ff00ff"), new CornerRadii(10), new Insets(10));
+//                                Background background = new Background(backgroundFill);
+//                                setBackground(background);
+                            }
                         }
-                    }
-                };
-            }
-        });
+                    };
+                }
+            });
+        }
     }
 
 
@@ -121,7 +133,7 @@ public class HomeController implements Initializable, WebDriverCallback {
                     button.setUserData(account.shopName);
                     button.setOnAction(event1 -> controllers.get(account.shopName).bringDriverToFront());
                     buttonMapChrome.put(account.rowId, button);
-                    Platform.runLater(()-> actionTiktok.getChildren().add(button));
+                    Platform.runLater(() -> tiktokAccount.getChildren().add(button));
                     return account;
                 })
                 .subscribe(new Observer<AccountModel>() {
@@ -142,7 +154,7 @@ public class HomeController implements Initializable, WebDriverCallback {
 //                                return;
 //                            }
                             BaseController controller = new TiktokController(account, HomeController.this);
-                            controllers.put(account.shopName,controller);
+                            controllers.put(account.shopName, controller);
                             controller.runNow();
 
                         } catch (Exception ig) {
@@ -153,8 +165,10 @@ public class HomeController implements Initializable, WebDriverCallback {
     }
 
     @Override
-    public void updateListView(int type, MessageListView message) {
+    public void updateListView(AccountModel accountModel, MessageListView message) {
         Platform.runLater(() -> {
+            int type = accountModel.type;
+            ListView<MessageListView> accountTiktok = mapListView.get(accountModel.shopName);
             if (type == 1) { // Shopee
 
             } else if (type == 2) { //Tiktok

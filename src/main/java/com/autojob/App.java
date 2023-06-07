@@ -126,11 +126,11 @@ public class App extends Application {
 
     @Override
     public void stop() throws Exception {
-        super.stop();
         for (IRegisterStopApp callback : listCallbackRegisterStopApp) {
             callback.onStopApp();
         }
         addEventWhenShutdownApp();
+        super.stop();
         System.exit(0);
         Platform.exit();
     }
@@ -147,7 +147,7 @@ public class App extends Application {
         APP_STOPPING = true;
     }
 
-    private static void addEventWhenShutdownApp() {
+    private  void addEventWhenShutdownApp() {
         //Add event when turn off application
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Shutdown application!");

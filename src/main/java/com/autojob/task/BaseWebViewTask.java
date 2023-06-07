@@ -115,12 +115,12 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
 
     public void updateListView(String message) {
         MessageListView item = formatMessage(message, null);
-        webDriverCallback.updateListView(accountModel.type, item);
+        webDriverCallback.updateListView(accountModel, item);
     }
 
     public void updateListView(String message, Color color) {
         MessageListView item = formatMessage(message, color);
-        webDriverCallback.updateListView(accountModel.type, item);
+        webDriverCallback.updateListView(accountModel, item);
     }
 
     private MessageListView formatMessage(String message, Color color) {
