@@ -9,22 +9,31 @@ import javafx.scene.paint.Color;
 public class MessageListView {
     public String message;
     public Color color;
+    public String bgColor;
+
+    public MessageListView(String message) {
+        this(message,null);
+    }
 
     public MessageListView(String message, Color color) {
-        this(message);
+        this(message,color,null);
+    }
+    public MessageListView(String message, Color color, String bgColor) {
         this.message = message;
         if (color == null) {
             this.color = Color.BLACK;
         } else {
             this.color = color;
         }
-
+        this.bgColor = bgColor;
+//        if(bgColor == null){
+//            this.bgColor = "white";
+//        }else{
+//            this.bgColor = bgColor;
+//        }
     }
 
-    public MessageListView(String message) {
-        this.message = message;
-        this.color = Color.BLACK;
-    }
+
 
     @Override
     public String toString() {

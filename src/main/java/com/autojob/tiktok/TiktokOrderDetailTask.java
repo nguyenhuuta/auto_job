@@ -8,7 +8,9 @@ import com.autojob.model.entities.AccountModel;
 import com.autojob.model.entities.BaseResponse;
 import com.autojob.model.entities.TiktokOrderRateBody;
 import com.autojob.task.BaseWebViewTask;
+import com.autojob.utils.ColorConst;
 import com.autojob.utils.TimeUtils;
+import com.autojob.utils.Utils;
 import javafx.scene.paint.Color;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -63,10 +65,21 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
      * @return
      */
     List<String> orderStringByType() throws InterruptedException {
-        print("OrderByType " + accountModel.shopId + "/" + type);
         Call<BaseResponse<List<String>>> call = ApiManager.BICA_ENDPOINT.orderNeedBuyerPhone(accountModel.shopId, type);
         return RequestQueue.getInstance().executeRequest(call);
     }
+
+    String randomURL() {
+        print("Mở trang bất kỳ tránh BLOCK");
+        int random = Utils.randomInteger(1, 3);
+        if (random == 1) {
+            return TiktokParentTask.ENDPOINT + "product/rating";
+        } else if (random == 2) {
+            return TiktokParentTask.ENDPOINT + "profile/seller-profile";
+        }
+        return TiktokParentTask.ENDPOINT + "homepage";
+    }
+
 
     /**
      * Cập nhật SĐT, sendThanks vào đơn hàng
@@ -82,6 +95,9 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
             RequestQueue.getInstance().executeRequest(call);
             printGreen("Cập nhật lên server thành công");
             jsonArray.clear();
+            String url = randomURL();
+            load(url);
+            delaySecond(10);
         } catch (InterruptedException e) {
             e.printStackTrace();
             printE("updateOrderToServer lỗi");
@@ -95,7 +111,7 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
             type++;
             delaySecond(3);
             orderIds = orderStringByType();
-            print("List đơn hàng: " + orderIds.size());
+            printColor("LIST ĐƠN HÀNG: " + orderIds.size(),Color.WHITE, ColorConst.blueviolet);
             if (orderIds.isEmpty()) {
                 return;
             }

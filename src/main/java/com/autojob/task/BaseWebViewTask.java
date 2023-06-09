@@ -114,16 +114,19 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     public abstract String jobName();
 
     public void updateListView(String message) {
-        MessageListView item = formatMessage(message, null);
-        webDriverCallback.updateListView(accountModel, item);
+        updateListView(message,null);
     }
 
     public void updateListView(String message, Color color) {
-        MessageListView item = formatMessage(message, color);
+        updateListView(message,color,null);
+    }
+
+    public void updateListView(String message, Color color, String bgColor) {
+        MessageListView item = formatMessage(message, color,bgColor);
         webDriverCallback.updateListView(accountModel, item);
     }
 
-    private MessageListView formatMessage(String message, Color color) {
+    private MessageListView formatMessage(String message, Color color, String bgColor) {
         String time = TimeUtils.getCurrentDate(TimeUtils.formatDate1);
         String content;
         if (jobName().isEmpty()) {
@@ -131,7 +134,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         } else {
             content = String.format("%s - [%s][%s] => %s", time, accountModel.shopName, jobName(), message);
         }
-        return new MessageListView(content, color);
+        return new MessageListView(content, color,bgColor);
     }
 
     public void load(String url) {
@@ -761,7 +764,10 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     }
 
     public void printColor(String message, Color color) {
-        updateListView(message, color);
+        printColor(message,color,null);
+    }
+    public void printColor(String message, Color color,String bgColor) {
+        updateListView(message, color,bgColor);
         Logger.d(getTag(), message);
     }
 

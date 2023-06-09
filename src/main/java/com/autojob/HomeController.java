@@ -106,13 +106,18 @@ public class HomeController implements Initializable, WebDriverCallback {
                             if (item == null) {
                                 setText(null);
                                 setTextFill(null);
+                                setStyle(null);
                             } else {
                                 setText(item.message);
                                 setTextFill(item.color);
-//                                setStyle("-fx-background-color: blue;");
-//                                BackgroundFill backgroundFill = new BackgroundFill(Color.valueOf("#ff00ff"), new CornerRadii(10), new Insets(10));
-//                                Background background = new Background(backgroundFill);
-//                                setBackground(background);
+                                String test;
+                                if(item.bgColor == null){
+                                    test = String.format("-fx-background-color: %s;font-family: Helvetica; -fx-font-size: 14px;","white");
+                                }else{
+                                    test = String.format("-fx-background-color: %s;font-family: Helvetica; -fx-font-size: 16px;", "linear-gradient(to right, #fc466b, #3f5efb)");
+                                }
+                                setStyle(test);
+
                             }
                         }
                     };
@@ -150,12 +155,13 @@ public class HomeController implements Initializable, WebDriverCallback {
                     @Override
                     public void onNext(AccountModel account) {
                         try {
-                            if (account.shopId == 6) {
-                                return;
-                            }
+//                            if (account.shopId == 6) {
+//                                return;
+//                            }
                             BaseController controller = new TiktokController(account, HomeController.this);
                             controllers.put(account.shopName, controller);
                             controller.runNow();
+
 
                         } catch (Exception ig) {
                             ig.printStackTrace();

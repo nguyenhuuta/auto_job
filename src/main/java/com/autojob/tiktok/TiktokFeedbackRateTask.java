@@ -2,12 +2,15 @@ package com.autojob.tiktok;
 
 import com.autojob.base.WebDriverCallback;
 import com.autojob.model.entities.AccountModel;
+import com.autojob.utils.ColorConst;
 import com.autojob.utils.TimeUtils;
 import com.autojob.utils.Utils;
+import javafx.scene.paint.Color;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
+import java.awt.*;
 import java.util.List;
 
 import static com.autojob.utils.TimeUtils.formatDate2;
@@ -35,6 +38,7 @@ class TiktokFeedbackRateTask extends BaseTiktokTask {
     @Override
     public void run() {
         try {
+            printColor("BẮT ĐẦU", Color.WHITE, ColorConst.blueviolet);
             List<WebElement> listRate = openUrlByList(URL_RATE, By.className("arco-tag-checkable"), "STAR LIST", false);
             if (listRate.size() != 7) {
                 throw new InterruptedException("Size != 7");
@@ -58,15 +62,16 @@ class TiktokFeedbackRateTask extends BaseTiktokTask {
             if (rangeDate != null && rangeDate.size() == 2) {
                 String date = TimeUtils.getCurrentDate(formatDate2);
                 WebElement start = rangeDate.get(0);
+                start.click();
+                delayMilliSecond(500);
                 start.sendKeys(date);
-                delayBetween(1, 2);
+                delayMilliSecond(600);
                 start.sendKeys(Keys.ENTER);
                 delayBetween(1, 2);
                 WebElement end = rangeDate.get(1);
                 end.sendKeys(date);
                 delayBetween(1, 2);
                 end.sendKeys(Keys.ENTER);
-                delayBetween(1, 2);
             }
 
             List<WebElement> listRating = checkDoneListBy(By.xpath("//div[contains(@class, 'ratingListItem')]"), "Rate");
@@ -78,7 +83,7 @@ class TiktokFeedbackRateTask extends BaseTiktokTask {
             if (size != sizeOrder || size != sizeStar) {
                 throw new InterruptedException("Size List không bằng nhau");
             }
-            print("Có: " + size + " đánh giá chưa phản hồi");
+            print("Có " + size + " đánh giá chưa phản hồi");
             int count = 0;
             while (count < size) {
                 try {
