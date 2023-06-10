@@ -80,6 +80,10 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
         return TiktokParentTask.ENDPOINT + "homepage";
     }
 
+    @Override
+    public void updateApi() {
+        updateOrderToServer();
+    }
 
     /**
      * Cập nhật SĐT, sendThanks vào đơn hàng
@@ -148,7 +152,7 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
                 String format = String.format("============ %s| %s ============", currentIndex, orderId);
                 print(format);
                 String url = String.format(urlDetail, TiktokParentTask.ENDPOINT, orderId);
-                WebElement chatIcon = openUrl(url, By.xpath("//div[contains(@class, 'IMICon__IMIconBackground')]"), "Icon Chat");
+                WebElement chatIcon = openUrl(url, By.xpath("//div[contains(@class, 'IMICon__IMIconBackground')]"), "Icon Chat",15);
 
                 delaySecond(2);
                 switch (type) {
@@ -178,8 +182,7 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
                 }
             } catch (Exception e) {
                 printE("OpenOrderDetail Lỗi " + e);
-                ScreenshotFullModel.screenShotFull(webDriver, "order_detail");
-                delaySecond(5);
+                delaySecond(30);
             }
             index++;
         }
@@ -219,17 +222,16 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
                 }
             }
         }
-
+        delaySecond(5);
+        ArrayList<String> tabs = new ArrayList<>(webDriver.getWindowHandles());
         try {
-            delaySecond(5);
-            ArrayList<String> tabs = new ArrayList<>(webDriver.getWindowHandles());
             if (tabs.size() != 2) {
                 throw new InterruptedException("Mở tab chat lỗi");
             }
             webDriver.switchTo().window(tabs.get(1));
 
             String[] array = message();
-            WebElement textArea = checkDoneBy(By.xpath("//*[@id='chat-input-textarea']/textarea"), "ChatInput");
+            WebElement textArea = checkDoneBy(By.xpath("//*[@id='chat-input-textarea']/textarea"), "ChatInput",10);
 //          Check khách hàng có đang chat với shop không?
             delaySecond(5);
             List<WebElement> listContent = getElementsByXpath("//div[@class='chatd-scrollView-content']/div");
@@ -244,14 +246,14 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
                 print("Gửi chat thành công");
                 delayBetween(5, 10);
             }
-            webDriver.close();
-            webDriver.switchTo().window(tabs.get(0));
-            print("Tắt chat");
-            delayBetween(10, 20);
-
         } catch (Exception exception) {
             printException(exception);
             exception.printStackTrace();
+        }finally {
+            delayBetween(10, 20);
+            webDriver.close();
+            webDriver.switchTo().window(tabs.get(0));
+            print("Tắt chat");
         }
     }
 

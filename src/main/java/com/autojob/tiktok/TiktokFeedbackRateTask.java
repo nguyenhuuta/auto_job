@@ -43,18 +43,19 @@ class TiktokFeedbackRateTask extends BaseTiktokTask {
             if (listRate.size() != 7) {
                 throw new InterruptedException("Size != 7");
             }
+            int timeDelay = 300;
             //star 3
             listRate.get(2).click();
-            delayMilliSecond(400);
+            delayMilliSecond(timeDelay);
             //star 4
             listRate.get(3).click();
-            delayMilliSecond(400);
+            delayMilliSecond(timeDelay);
             //star 5
             listRate.get(4).click();
-            delayMilliSecond(400);
+            delayMilliSecond(timeDelay);
             // button chưa trả lời
             listRate.get(5).click();
-            delayMilliSecond(400);
+            delayMilliSecond(timeDelay);
             checkDoneListBy(By.xpath("//div[contains(@class, 'ratingListItem')]"), "Rate");
             hidePopupReplyLate();
 
@@ -63,14 +64,14 @@ class TiktokFeedbackRateTask extends BaseTiktokTask {
                 String date = TimeUtils.getCurrentDate(formatDate2);
                 WebElement start = rangeDate.get(0);
                 start.click();
-                delayMilliSecond(500);
+                delayMilliSecond(timeDelay);
                 start.sendKeys(date);
-                delayMilliSecond(600);
+                delayMilliSecond(timeDelay);
                 start.sendKeys(Keys.ENTER);
-                delayBetween(1, 2);
+                delayMilliSecond(timeDelay);
                 WebElement end = rangeDate.get(1);
                 end.sendKeys(date);
-                delayBetween(1, 2);
+                delayMilliSecond(timeDelay);
                 end.sendKeys(Keys.ENTER);
             }
 

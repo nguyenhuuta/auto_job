@@ -840,6 +840,8 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         actionObject.perform();
     }
 
+    public void updateApi(){}
+
     public void tryClick(WebElement element, int height) {
         boolean clickable;
         do {
@@ -856,7 +858,30 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     }
 
     int numberRetry = 10;
+    public WebElement checkDoneBy(By by, String tag, int numberRetry) throws InterruptedException {
+        WebElement element;
+        int count = 1;
+        do {
+            if (count > numberRetry) {
+                printE("CheckDoneBy: " + tag + " Hết số lần thử");
+                playSoundError();
+                screenShotFull(tag);
+                updateApi();
+                return null;
+            }
+            delaySecond(2);
+            try {
+                element = webDriver.findElement(by);
+            } catch (Exception ignore) {
+                element = null;
+            }
+            count++;
+        } while (element == null);
+        print(tag + " load done");
+        return element;
+    }
 
+    //sc_menu_container
     public WebElement checkDoneBy(By by, String tag) throws InterruptedException {
         WebElement element;
         int count = 1;

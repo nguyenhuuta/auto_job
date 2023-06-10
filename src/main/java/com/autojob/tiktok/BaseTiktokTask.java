@@ -57,4 +57,11 @@ abstract class BaseTiktokTask extends BaseWebViewTask {
         hidePopupReplyLate();
         return element;
     }
+
+    WebElement openUrl(String url, By by, String tag, int numberRetry) throws InterruptedException {
+        load(url);
+        WebElement element = checkDoneBy(by, tag,numberRetry);
+        hidePopupReplyLate();
+        return element;
+    }
 }
