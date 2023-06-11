@@ -114,7 +114,7 @@ public class HomeController implements Initializable, WebDriverCallback {
                                 if(item.bgColor == null){
                                     test = String.format("-fx-background-color: %s;font-family: Helvetica; -fx-font-size: 14px;","white");
                                 }else{
-                                    test = String.format("-fx-background-color: %s;font-family: Helvetica; -fx-font-size: 16px;", "linear-gradient(to right, #fc466b, #3f5efb)");
+                                    test = String.format("-fx-background-color: %s;font-family: Helvetica; -fx-font-size: 14px;", "linear-gradient(to right, #fc466b, #3f5efb)");
                                 }
                                 setStyle(test);
 
