@@ -119,35 +119,35 @@ class TiktokFeedbackRateTask extends BaseTiktokTask {
         }
     }
 
-    /**
-     * Xử lý đánh giá 1,2*
-     */
-    private void sendChatBuyerRateNotGood(WebElement elementOrder) {
-        try {
-            String text = elementOrder.getText();
-            String orderId = "";
-            if (text.contains(":")) {
-                orderId = text.split(":")[1];
-                print("orderId " + orderId);
-            }
-            if (orderId.isEmpty()) {
-                printE("Không lấy được orderId");
-                return;
-            }
-            print("orderId " + orderId);
-            openNewTab();
-            if (orderDetailTask == null) {
-                orderDetailTask = new TiktokOrderDetailTask(accountModel, webDriverCallback);
-                orderDetailTask.setWebDriver(webDriver);
-            }
-            orderDetailTask.feedbackRateNotGood(orderId);
-        } catch (Exception e) {
-            printE("Gửi chat cho khách hàng đánh giá 1,2* lỗi " + e.toString());
-            e.printStackTrace();
-        }
-
-
-    }
+//    /**
+//     * Xử lý đánh giá 1,2*
+//     */
+//    private void sendChatBuyerRateNotGood(WebElement elementOrder) {
+//        try {
+//            String text = elementOrder.getText();
+//            String orderId = "";
+//            if (text.contains(":")) {
+//                orderId = text.split(":")[1];
+//                print("orderId " + orderId);
+//            }
+//            if (orderId.isEmpty()) {
+//                printE("Không lấy được orderId");
+//                return;
+//            }
+//            print("orderId " + orderId);
+//            openNewTab();
+//            if (orderDetailTask == null) {
+//                orderDetailTask = new TiktokOrderDetailTask(accountModel, webDriverCallback);
+//                orderDetailTask.setWebDriver(webDriver);
+//            }
+//            orderDetailTask.feedbackRateNotGood(orderId);
+//        } catch (Exception e) {
+//            printE("Gửi chat cho khách hàng đánh giá 1,2* lỗi " + e.toString());
+//            e.printStackTrace();
+//        }
+//
+//
+//    }
 
 
     private void sendFeedback(WebElement buttonFeedback, int start) {

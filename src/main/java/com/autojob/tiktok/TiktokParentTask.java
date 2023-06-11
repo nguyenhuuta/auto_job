@@ -31,6 +31,7 @@ public class TiktokParentTask extends TimerTask {
     static final String URL_LOGIN = TiktokParentTask.ENDPOINT + "account/login";
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     BaseWebViewTask orderDetailTask;
+    BaseWebViewTask sendThankTask;
     BaseWebViewTask feedbackRating;
 
 
@@ -41,6 +42,7 @@ public class TiktokParentTask extends TimerTask {
         this.accountModel = accountModel;
         this.webDriverCallback = callback;
         orderDetailTask = new TiktokOrderDetailTask(accountModel, webDriverCallback);
+        sendThankTask = new TiktokSendThanksTask(accountModel, webDriverCallback);
         feedbackRating = new TiktokFeedbackRateTask(accountModel, webDriverCallback);
     }
 
@@ -52,7 +54,7 @@ public class TiktokParentTask extends TimerTask {
             orderDetailTask.updateListView("Ngoài giờ hoạt động 8h -> 22h");
             return;
         }
-        if(accountModel.expired == null){
+        if (accountModel.expired == null) {
             Set<Cookie> cookieSet = orderDetailTask.webDriver.manage().getCookies();
             for (Cookie cookie : cookieSet) {
                 String code = cookie.getName();
@@ -64,11 +66,12 @@ public class TiktokParentTask extends TimerTask {
         }
 
         webDriverCallback.expiredCookie(accountModel);
-        orderDetailTask.run();
-        feedbackRating.run();
-        orderDetailTask.load(ENDPOINT+"homepage");
+        sendThankTask.run();
+//        orderDetailTask.run();
+//        feedbackRating.run();
+        orderDetailTask.load(ENDPOINT + "homepage");
         String text = "LẦN CHẠY TỚI VÀO: " + TimeUtils.addMinute(10);
-        orderDetailTask.printColor(text,Color.DARKVIOLET);
+        orderDetailTask.printColor(text, Color.DARKVIOLET);
     }
 
 
@@ -78,6 +81,7 @@ public class TiktokParentTask extends TimerTask {
         WebDriver webDriver = WebDriverUtils.getInstance().createWebDriver(chromeSetting);
         orderDetailTask.print("Start CHROME");
         orderDetailTask.setWebDriver(webDriver);
+        sendThankTask.setWebDriver(webDriver);
         feedbackRating.setWebDriver(webDriver);
         checkLogin();
     }

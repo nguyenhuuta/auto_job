@@ -1,26 +1,20 @@
 package com.autojob.tiktok;
 
-import com.autojob.ScreenshotFullModel;
 import com.autojob.api.ApiManager;
 import com.autojob.api.RequestQueue;
 import com.autojob.base.WebDriverCallback;
 import com.autojob.model.entities.AccountModel;
 import com.autojob.model.entities.BaseResponse;
 import com.autojob.model.entities.TiktokOrderRateBody;
-import com.autojob.task.BaseWebViewTask;
 import com.autojob.utils.ColorConst;
-import com.autojob.utils.TimeUtils;
 import com.autojob.utils.Utils;
 import javafx.scene.paint.Color;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import retrofit2.Call;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -28,13 +22,6 @@ import java.util.List;
  */
 class TiktokOrderDetailTask extends BaseTiktokTask {
     final String urlDetail = "%sorder/detail?order_no=%s&shop_region=VN";
-    /**
-     * 0: Trạng thái bắt đầu
-     * 1: Lấy SĐT
-     * 2: Gửi lời cảm ơn đơn hàng
-     * 3: Trả lời đánh giá khách hàng 1,2*
-     */
-    private int type = 0;
     List<TiktokOrderRateBody> jsonArray = new ArrayList<>();
 
     public TiktokOrderDetailTask(AccountModel accountModel, WebDriverCallback webDriverCallback) {
@@ -45,14 +32,7 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
 
     @Override
     public String jobName() {
-        if (type == 1) {
-            return "LẤY SĐT";
-        } else if (type == 2) {
-            return "GỬI CẢM ƠN";
-        } else if (type == 3) {
-            return "PHẢN HỒI";
-        }
-        return "";
+        return "LẤY SĐT";
 
     }
 
@@ -61,11 +41,9 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
      * type
      * 1: Lấy sđt từ đơn hàng
      * 2: Lấy đơn hàng chưa gửi lời cảm ơn
-     *
-     * @return
      */
     List<String> orderStringByType() throws InterruptedException {
-        Call<BaseResponse<List<String>>> call = ApiManager.BICA_ENDPOINT.orderNeedBuyerPhone(accountModel.shopId, type);
+        Call<BaseResponse<List<String>>> call = ApiManager.BICA_ENDPOINT.orderNeedBuyerPhone(accountModel.shopId, 1);
         return RequestQueue.getInstance().executeRequest(call);
     }
 
@@ -112,10 +90,9 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
     @Override
     public void run() {
         try {
-            type++;
             delaySecond(3);
             orderIds = orderStringByType();
-            printColor("LIST ĐƠN HÀNG: " + orderIds.size(),Color.WHITE, ColorConst.blueviolet);
+            printColor("LIST ĐƠN HÀNG: " + orderIds.size(), Color.WHITE, ColorConst.blueviolet);
             if (orderIds.isEmpty()) {
                 return;
             }
@@ -124,23 +101,9 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
             printException(e);
         } finally {
             print("HOÀN THÀNH");
-            if (type < 2) {
-                run();
-            } else {
-                type = 0;
-            }
         }
     }
 
-    /**
-     * Trả lời khách hàng từ đánh giá 1, 2*
-     */
-    public void feedbackRateNotGood(String orderId) {
-        type = 3;
-        orderIds.clear();
-        orderIds.add(orderId);
-        openOrderDetail();
-    }
 
     void openOrderDetail() {
         int size = orderIds.size();
@@ -152,31 +115,18 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
                 String format = String.format("============ %s| %s ============", currentIndex, orderId);
                 print(format);
                 String url = String.format(urlDetail, TiktokParentTask.ENDPOINT, orderId);
-                WebElement chatIcon = openUrl(url, By.xpath("//div[contains(@class, 'IMICon__IMIconBackground')]"), "Icon Chat",15);
-
+                openUrl(url, By.xpath("//div[contains(@class, 'IMICon__IMIconBackground')]"), "Icon Chat", 15);
                 delaySecond(2);
-                switch (type) {
-                    case 1: // Lấy SĐT
-                        String phone = getBuyerPhone();
-                        if (phone.isEmpty()) {
-                            phone = "Không lấy được phone";
-                        }
-                        print("SĐT: " + phone);
-                        TiktokOrderRateBody body = new TiktokOrderRateBody();
-                        body.orderId = orderId;
-                        body.buyerPhone = phone;
-                        jsonArray.add(body);
-                        break;
-                    case 2:// Gửi cảm ơn
-                    case 3:// Phản hồi đánh giá 1,2*
-                        chatIcon.click();
-                        sendChat();
-                        TiktokOrderRateBody bodyThanks = new TiktokOrderRateBody();
-                        bodyThanks.orderId = orderId;
-                        bodyThanks.sendThanks = true;
-                        jsonArray.add(bodyThanks);
-                        break;
+                String phone = getBuyerPhone();
+                if (phone.isEmpty()) {
+                    phone = "Không lấy được phone";
                 }
+                print("SĐT: " + phone);
+                TiktokOrderRateBody body = new TiktokOrderRateBody();
+                body.orderId = orderId;
+                body.buyerPhone = phone;
+                jsonArray.add(body);
+
                 if (jsonArray.size() == 10) {
                     updateOrderToServer();
                 }
@@ -205,71 +155,5 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
             printE(e.getMessage());
             return "";
         }
-    }
-
-
-    private void sendChat() {
-        if (type == 3) {
-            int count = 0;
-            while (count < 3) {
-                ArrayList<String> tabs = new ArrayList<>(webDriver.getWindowHandles());
-                count = tabs.size();
-                log("count" + count);
-                delaySecond(1);
-                if (count == 3) {
-                    webDriver.switchTo().window(tabs.get(1));
-                    webDriver.close();
-                }
-            }
-        }
-        delaySecond(5);
-        ArrayList<String> tabs = new ArrayList<>(webDriver.getWindowHandles());
-        try {
-            if (tabs.size() != 2) {
-                throw new InterruptedException("Mở tab chat lỗi");
-            }
-            webDriver.switchTo().window(tabs.get(1));
-
-            String[] array = message();
-            WebElement textArea = checkDoneBy(By.xpath("//*[@id='chat-input-textarea']/textarea"), "ChatInput",10);
-//          Check khách hàng có đang chat với shop không?
-            delaySecond(5);
-            List<WebElement> listContent = getElementsByXpath("//div[@class='chatd-scrollView-content']/div");
-            if (type != 3 && listContent != null && listContent.size() > 3) {
-                printColor("[SKIP]Khách hàng đang có cuộc trò chuyện với shop, bỏ qua đơn hàng ", Color.BLUE);
-            } else {
-                for (String value : array) {
-                    textArea.sendKeys(value);
-                    textArea.sendKeys(Keys.SHIFT, Keys.ENTER);
-                }
-                textArea.sendKeys(Keys.ENTER);
-                print("Gửi chat thành công");
-                delayBetween(5, 10);
-            }
-        } catch (Exception exception) {
-            printException(exception);
-            exception.printStackTrace();
-        }finally {
-            delayBetween(10, 20);
-            webDriver.close();
-            webDriver.switchTo().window(tabs.get(0));
-            print("Tắt chat");
-        }
-    }
-
-    private String[] message() {
-        if (type == 2) {
-            return new String[]{
-                    "Shop thấy bạn đã nhận hàng",
-                    "Không biết sản phẩm bên mình bạn có hài lòng không ạ?",
-                    "Hàng bên mình được đổi trả trong 3 ngày.",
-                    "Nếu bạn hài lòng hãy ĐÁNH GIÁ cho shop 5* nhé ^^.",
-                    "ĐỪNG VỘI ĐÁNH GIÁ XẤU nếu sản phẩm có vấn đề, hãy nhắn tin hoặc liên hệ: 0342.092.686 để shop xử lý ngay ạ."
-            };
-        } else if (type == 3) {
-            return new String[]{
-                    TiktokFeedbackRateTask.messageNotGood};
-        }
-        return new String[]{};
     }
 }
