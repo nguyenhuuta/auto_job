@@ -20,8 +20,7 @@ import java.util.List;
  * Created by OpenYourEyes on 01/06/2023
  */
 class TiktokSendThanksTask extends BaseTiktokTask {
-    final String urlSearch = "order?main_order_id[]=%s&selected_sort=6&tab=all";
-
+    final String urlDetail = "order?selected_sort=6&tab=all";
     List<TiktokOrderRateBody> jsonArray = new ArrayList<>();
 
     public TiktokSendThanksTask(AccountModel accountModel, WebDriverCallback webDriverCallback) {
@@ -84,6 +83,7 @@ class TiktokSendThanksTask extends BaseTiktokTask {
             if (orderIds.isEmpty()) {
                 return;
             }
+            load(TiktokParentTask.ENDPOINT + urlDetail);
             searchOrder();
         } catch (Exception e) {
             printException(e);
@@ -101,10 +101,15 @@ class TiktokSendThanksTask extends BaseTiktokTask {
                 String currentIndex = (index + 1) + "/" + size;
                 String format = String.format("============ %s| %s ============", currentIndex, orderId);
                 print(format);
+                WebElement inputSearch = checkDoneBy(By.cssSelector("input[data-dtid='order.filter_area.input.main_order_id']"), "InputSearch");
+                inputSearch.click();
+                inputSearch.clear();
+                delayMilliSecond(500);
+                inputSearch.sendKeys(orderId);
+                delayMilliSecond(400);
+                inputSearch.sendKeys(Keys.ENTER);
                 print("Tìm kiếm đơn " + orderId);
-                String url = String.format(urlSearch, orderId);
-                By by = By.cssSelector("div[data-log_click_for='contact_buyer']");
-                WebElement chatIcon = openUrl(TiktokParentTask.ENDPOINT + url, by, "ContactBuyer");
+                WebElement chatIcon = checkDoneBy(By.cssSelector("div[data-log_click_for='contact_buyer']"), "ContactBuyer");
                 delaySecond(2);
                 chatIcon.click();
                 sendChat();
