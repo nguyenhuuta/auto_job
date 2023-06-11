@@ -20,7 +20,8 @@ import java.util.List;
  * Created by OpenYourEyes on 01/06/2023
  */
 class TiktokSendThanksTask extends BaseTiktokTask {
-    final String urlDetail = "order?selected_sort=6&tab=all";
+    final String urlSearch = "order?main_order_id[]=%s&selected_sort=6&tab=all";
+
     List<TiktokOrderRateBody> jsonArray = new ArrayList<>();
 
     public TiktokSendThanksTask(AccountModel accountModel, WebDriverCallback webDriverCallback) {
@@ -83,7 +84,6 @@ class TiktokSendThanksTask extends BaseTiktokTask {
             if (orderIds.isEmpty()) {
                 return;
             }
-            load(TiktokParentTask.ENDPOINT + urlDetail);
             searchOrder();
         } catch (Exception e) {
             printException(e);
@@ -101,14 +101,10 @@ class TiktokSendThanksTask extends BaseTiktokTask {
                 String currentIndex = (index + 1) + "/" + size;
                 String format = String.format("============ %s| %s ============", currentIndex, orderId);
                 print(format);
-                WebElement inputSearch = checkDoneBy(By.cssSelector("input[data-dtid='order.filter_area.input.main_order_id']"), "InputSearch");
-                inputSearch.click();
-                delayMilliSecond(400);
-                inputSearch.sendKeys(orderId);
-                delayMilliSecond(400);
-                inputSearch.sendKeys(Keys.ENTER);
                 print("Tìm kiếm đơn " + orderId);
-                WebElement chatIcon = checkDoneBy(By.cssSelector("div[data-log_click_for='contact_buyer']"), "ContactBuyer");
+                String url = String.format(urlSearch, orderId);
+                By by = By.cssSelector("div[data-log_click_for='contact_buyer']");
+                WebElement chatIcon = openUrl(TiktokParentTask.ENDPOINT + url, by, "ContactBuyer");
                 delaySecond(2);
                 chatIcon.click();
                 sendChat();
@@ -140,20 +136,13 @@ class TiktokSendThanksTask extends BaseTiktokTask {
 
             String[] array = message();
             WebElement textArea = checkDoneBy(By.xpath("//*[@id='chat-input-textarea']/textarea"), "ChatInput", 10);
-//          Check khách hàng có đang chat với shop không?
             delaySecond(2);
-//            List<WebElement> listContent = getElementsByXpath("//div[@class='chatd-scrollView-content']/div");
-//            if (listContent != null && listContent.size() > 3) {
-//                printColor("[SKIP]Khách hàng đang có cuộc trò chuyện với shop, bỏ qua đơn hàng ", Color.BLUE);
-//            } else {
-//                for (String value : array) {
-//                    textArea.sendKeys(value);
-//                    textArea.sendKeys(Keys.SHIFT, Keys.ENTER);
-//                }
-//                textArea.sendKeys(Keys.ENTER);
-//                print("Gửi chat thành công");
-//                delayBetween(5, 10);
-//            }
+            for (String value : array) {
+                textArea.sendKeys(value);
+                textArea.sendKeys(Keys.SHIFT, Keys.ENTER);
+            }
+            textArea.sendKeys(Keys.ENTER);
+            print("Gửi chat thành công");
         } catch (Exception exception) {
             printException(exception);
             exception.printStackTrace();
