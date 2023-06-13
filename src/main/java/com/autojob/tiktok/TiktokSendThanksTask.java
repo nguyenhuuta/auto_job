@@ -13,6 +13,7 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import retrofit2.Call;
 
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -97,22 +98,44 @@ class TiktokSendThanksTask extends BaseTiktokTask {
         int index = 0;
         while (index < size) {
             try {
+                hidePopupReplyLate();
                 String orderId = orderIds.get(index);
                 String currentIndex = (index + 1) + "/" + size;
                 String format = String.format("============ %s| %s ============", currentIndex, orderId);
                 print(format);
                 WebElement inputSearch = checkDoneBy(By.cssSelector("input[data-dtid='order.filter_area.input.main_order_id']"), "InputSearch");
                 inputSearch.click();
-                inputSearch.clear();
+                delayMilliSecond(500);
+                try {
+                    WebElement clear = getElementByClassName("arco-input-clear-icon");
+                    if(clear != null){
+                        clear.click();
+                        print("Xóa đơn hàng cũ");
+                    }
+                }catch (Exception e){
+                    throw new InterruptedException("Button clear text click lỗi " + e);
+                }
                 delayMilliSecond(500);
                 inputSearch.sendKeys(orderId);
                 delayMilliSecond(400);
+                print("Nhập đơn hàng mới");
                 inputSearch.sendKeys(Keys.ENTER);
                 print("Tìm kiếm đơn " + orderId);
                 WebElement chatIcon = checkDoneBy(By.cssSelector("div[data-log_click_for='contact_buyer']"), "ContactBuyer");
-                delaySecond(2);
+                int count = 0;
+                WebElement chatSVG;
+                do {
+                    delaySecond(2);
+                    chatSVG = getElementByTagName(chatIcon,"svg");
+                    count++;
+                    if(count > 3){
+                        throw new InterruptedException("Icon Chat không hiển thị");
+                    }
+                }while (chatSVG == null);
+
                 chatIcon.click();
-                sendChat();
+                String buyerName = chatIcon.getText();
+                sendChat(buyerName);
                 TiktokOrderRateBody bodyThanks = new TiktokOrderRateBody();
                 bodyThanks.orderId = orderId;
                 bodyThanks.sendThanks = true;
@@ -122,15 +145,29 @@ class TiktokSendThanksTask extends BaseTiktokTask {
                 }
             } catch (Exception e) {
                 printE("SearchOrder Lỗi " + e);
-                delaySecond(30);
+                e.printStackTrace();
+                updateApi();
+                delaySecond(5);
             }
             index++;
         }
+
+        ArrayList<String> tabs = new ArrayList<>(webDriver.getWindowHandles());
+        try {
+            if (tabs.size() == 2) {
+                webDriver.switchTo().window(tabs.get(1));
+                webDriver.close();
+                webDriver.switchTo().window(tabs.get(0));
+            }
+        }catch (Exception e){
+
+        }
+
         updateOrderToServer();
     }
 
 
-    private void sendChat() {
+    private void sendChat(String buyerName) {
         delaySecond(5);
         ArrayList<String> tabs = new ArrayList<>(webDriver.getWindowHandles());
         try {
@@ -140,7 +177,19 @@ class TiktokSendThanksTask extends BaseTiktokTask {
             webDriver.switchTo().window(tabs.get(1));
 
             String[] array = message();
+            WebElement buyerNameElement;
+            String text = "";
+            do {
+                delaySecond(2);
+                buyerNameElement = checkDoneBy(By.xpath("//div[contains(@class, 'FOIFN_')]"), "BuyerName");
+                if(buyerNameElement != null){
+                    text = buyerNameElement.getText();
+                    print("new Buyer: " + text +"/"+ buyerName);
+
+                }
+            }while(!buyerName.equals(text));
             WebElement textArea = checkDoneBy(By.xpath("//*[@id='chat-input-textarea']/textarea"), "ChatInput", 10);
+            print("Hiển thị chat thành công");
             delaySecond(2);
             for (String value : array) {
                 textArea.sendKeys(value);
@@ -153,7 +202,7 @@ class TiktokSendThanksTask extends BaseTiktokTask {
             exception.printStackTrace();
         } finally {
             delayBetween(10, 20);
-            webDriver.close();
+//            webDriver.close();
             webDriver.switchTo().window(tabs.get(0));
             print("Tắt chat");
         }
