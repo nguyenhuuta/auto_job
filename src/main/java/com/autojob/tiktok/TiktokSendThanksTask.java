@@ -68,6 +68,7 @@ class TiktokSendThanksTask extends BaseTiktokTask {
             RequestQueue.getInstance().executeRequest(call);
             printGreen("Cập nhật lên server thành công");
             jsonArray.clear();
+            delaySecond(60);
         } catch (InterruptedException e) {
             e.printStackTrace();
             printE("updateOrderToServer lỗi");

@@ -79,7 +79,7 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
             jsonArray.clear();
             String url = randomURL();
             load(url);
-            delaySecond(10);
+            delaySecond(60);
         } catch (InterruptedException e) {
             e.printStackTrace();
             printE("updateOrderToServer lỗi");

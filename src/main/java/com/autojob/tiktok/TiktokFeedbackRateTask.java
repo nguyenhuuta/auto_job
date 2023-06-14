@@ -61,18 +61,13 @@ class TiktokFeedbackRateTask extends BaseTiktokTask {
 
             List<WebElement> rangeDate = getElementsByXpath("//input[@placeholder='Từ' or @placeholder='Đến']");
             if (rangeDate != null && rangeDate.size() == 2) {
-                String date = TimeUtils.getCurrentDate(formatDate2);
                 WebElement start = rangeDate.get(0);
                 start.click();
-                delayMilliSecond(timeDelay);
-                start.sendKeys(date);
-                delayMilliSecond(timeDelay);
-                start.sendKeys(Keys.ENTER);
-                delayMilliSecond(timeDelay);
-                WebElement end = rangeDate.get(1);
-                end.sendKeys(date);
-                delayMilliSecond(timeDelay);
-                end.sendKeys(Keys.ENTER);
+                delaySecond(2);
+                WebElement today = checkDoneBy(By.className("product-arco-picker-cell-today"),"CurrentDay");
+                today.click();
+                delaySecond(2);
+                today.click();
             }
 
             List<WebElement> listRating = checkDoneListBy(By.xpath("//div[contains(@class, 'ratingListItem')]"), "Rate");
