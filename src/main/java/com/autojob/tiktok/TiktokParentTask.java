@@ -49,8 +49,10 @@ public class TiktokParentTask extends TimerTask {
     @Override
     public void run() {
         int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        int minute = Calendar.getInstance().get(Calendar.MINUTE);
+
         System.out.println("Giờ hiện tại " + hour);
-        if (hour < 8 || hour > 22) {
+        if (hour < 8 || hour > 21) {
             orderDetailTask.updateListView("Ngoài giờ hoạt động 8h -> 22h");
             return;
         }
@@ -68,7 +70,9 @@ public class TiktokParentTask extends TimerTask {
         webDriverCallback.expiredCookie(accountModel);
         sendThankTask.run();
         orderDetailTask.run();
-        feedbackRating.run();
+        if(hour %  6 == 0 && minute < 30) {
+            feedbackRating.run();
+        }
         orderDetailTask.load(ENDPOINT + "homepage");
         String text = "LẦN CHẠY TỚI VÀO: " + TimeUtils.addMinute(10);
         orderDetailTask.printColor(text, Color.DARKVIOLET);
