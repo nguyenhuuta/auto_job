@@ -140,7 +140,7 @@ class TiktokSendThanksTask extends BaseTiktokTask {
 
                 String buyerName = chatIcon.getText();
                 System.out.println("buyerName " + buyerName);
-//                sendChat(buyerName);
+                sendChat(buyerName);
                 TiktokOrderRateBody bodyThanks = new TiktokOrderRateBody();
                 bodyThanks.orderId = orderId;
                 bodyThanks.sendThanks = true;
