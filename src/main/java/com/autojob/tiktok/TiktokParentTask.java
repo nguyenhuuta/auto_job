@@ -3,21 +3,16 @@ package com.autojob.tiktok;
 import com.autojob.base.WebDriverCallback;
 import com.autojob.model.entities.AccountModel;
 import com.autojob.model.entities.ChromeSetting;
-import com.autojob.model.entities.MessageListView;
 import com.autojob.task.BaseWebViewTask;
-import com.autojob.utils.Logger;
 import com.autojob.utils.TimeUtils;
 import com.autojob.utils.WebDriverUtils;
-import com.sun.corba.se.impl.orbutil.ObjectWriter;
 import javafx.scene.paint.Color;
-import jdk.nashorn.internal.parser.JSONParser;
-import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.util.*;
+import java.util.Calendar;
+import java.util.Set;
+import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -33,6 +28,7 @@ public class TiktokParentTask extends TimerTask {
     BaseWebViewTask orderDetailTask;
     BaseWebViewTask sendThankTask;
     BaseWebViewTask feedbackRating;
+    BaseWebViewTask affiliateTask;
 
 
     private final AccountModel accountModel;
@@ -44,6 +40,7 @@ public class TiktokParentTask extends TimerTask {
         orderDetailTask = new TiktokOrderDetailTask(accountModel, webDriverCallback);
         sendThankTask = new TiktokSendThanksTask(accountModel, webDriverCallback);
         feedbackRating = new TiktokFeedbackRateTask(accountModel, webDriverCallback);
+        affiliateTask = new TiktokAffiliateOrderTask(accountModel, webDriverCallback);
     }
 
     @Override
@@ -70,9 +67,10 @@ public class TiktokParentTask extends TimerTask {
         webDriverCallback.expiredCookie(accountModel);
         sendThankTask.run();
         orderDetailTask.run();
-        if(hour %  6 == 0 && minute < 30) {
+        if (hour % 6 == 0 && minute < 30) {
             feedbackRating.run();
         }
+        affiliateTask.run();
         orderDetailTask.load(ENDPOINT + "homepage");
         String text = "LẦN CHẠY TỚI VÀO: " + TimeUtils.addMinute(10);
         orderDetailTask.printColor(text, Color.DARKVIOLET);
@@ -87,6 +85,7 @@ public class TiktokParentTask extends TimerTask {
         orderDetailTask.setWebDriver(webDriver);
         sendThankTask.setWebDriver(webDriver);
         feedbackRating.setWebDriver(webDriver);
+        affiliateTask.setWebDriver(webDriver);
         checkLogin();
     }
 

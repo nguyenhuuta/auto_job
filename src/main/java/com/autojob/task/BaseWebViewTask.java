@@ -114,15 +114,15 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     public abstract String jobName();
 
     public void updateListView(String message) {
-        updateListView(message,null);
+        updateListView(message, null);
     }
 
     public void updateListView(String message, Color color) {
-        updateListView(message,color,null);
+        updateListView(message, color, null);
     }
 
     public void updateListView(String message, Color color, String bgColor) {
-        MessageListView item = formatMessage(message, color,bgColor);
+        MessageListView item = formatMessage(message, color, bgColor);
         webDriverCallback.updateListView(accountModel, item);
     }
 
@@ -134,7 +134,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         } else {
             content = String.format("%s - [%s][%s] => %s", time, accountModel.shopName, jobName(), message);
         }
-        return new MessageListView(content, color,bgColor);
+        return new MessageListView(content, color, bgColor);
     }
 
     public void load(String url) {
@@ -439,7 +439,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    public   WebElement getElementBy(WebElement parentElement, By by) {
+    public WebElement getElementBy(WebElement parentElement, By by) {
         try {
             return parentElement.findElement(by);
         } catch (Exception e) {
@@ -448,7 +448,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    public  List<WebElement> getElementsBy(WebElement parentElement, By by) {
+    public List<WebElement> getElementsBy(WebElement parentElement, By by) {
         try {
             return parentElement.findElements(by);
         } catch (Exception e) {
@@ -458,7 +458,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     }
 
 
-    public  WebElement getElementByCssSelector(WebElement parentElement, String selector) {
+    public WebElement getElementByCssSelector(WebElement parentElement, String selector) {
         if (!isValidTaskInRunning()) return null;
         try {
             return parentElement.findElement(By.cssSelector(selector));
@@ -468,7 +468,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    protected  List<WebElement> getElementsByCssSelector(WebElement parentElement, String selector) {
+    protected List<WebElement> getElementsByCssSelector(WebElement parentElement, String selector) {
         if (!isValidTaskInRunning()) return null;
         try {
             return parentElement.findElements(By.cssSelector(selector));
@@ -478,7 +478,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    protected  List<WebElement> getElementsByCssSelector(String selector) {
+    protected List<WebElement> getElementsByCssSelector(String selector) {
         if (!isValidTaskInRunning()) return null;
         try {
             return getWebDriver().findElements(By.cssSelector(selector));
@@ -488,7 +488,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    protected  WebElement getElementByCssSelector(String selector) {
+    protected WebElement getElementByCssSelector(String selector) {
         if (!isValidTaskInRunning()) return null;
         try {
             return getWebDriver().findElement(By.cssSelector(selector));
@@ -572,7 +572,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    protected  List<WebElement> getElementsByXpath(String xpath) {
+    protected List<WebElement> getElementsByXpath(String xpath) {
         try {
             return getWebDriver().findElements(By.xpath(xpath));
         } catch (Exception e) {
@@ -581,7 +581,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    protected  WebElement getElementByXpath(WebElement parent, String xpath) {
+    protected WebElement getElementByXpath(WebElement parent, String xpath) {
         try {
             return parent.findElement(By.xpath(xpath));
         } catch (Exception e) {
@@ -590,7 +590,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    protected  List<WebElement> getElementsById(WebElement parentElement, String id) {
+    protected List<WebElement> getElementsById(WebElement parentElement, String id) {
         if (!isValidTaskInRunning()) return null;
         try {
             return parentElement.findElements(By.id(id));
@@ -600,7 +600,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    protected  WebElement getElementByName(String name) {
+    protected WebElement getElementByName(String name) {
         try {
             return getWebDriver().findElement(By.name(name));
         } catch (Exception e) {
@@ -609,7 +609,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    protected  WebElement getElementByName(WebElement parentElement, String name) {
+    protected WebElement getElementByName(WebElement parentElement, String name) {
         try {
             return parentElement.findElement(By.name(name));
         } catch (Exception e) {
@@ -618,7 +618,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    protected  List<WebElement> getElementsByName(String name) {
+    protected List<WebElement> getElementsByName(String name) {
         try {
             return getWebDriver().findElements(By.name(name));
         } catch (Exception e) {
@@ -627,7 +627,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    protected  List<WebElement> getElementsByName(WebElement parent, String name) {
+    protected List<WebElement> getElementsByName(WebElement parent, String name) {
         try {
             return parent.findElements(By.name(name));
         } catch (Exception e) {
@@ -636,7 +636,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    protected  WebElement getElementByTagName(String name) {
+    protected WebElement getElementByTagName(String name) {
         try {
             return getWebDriver().findElement(By.tagName(name));
         } catch (Exception e) {
@@ -644,6 +644,16 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
             return null;
         }
     }
+
+    protected List<WebElement> elementsByTagName(String name) {
+        try {
+            return webDriver.findElements(By.tagName(name));
+        } catch (Exception e) {
+            Logger.warning(getTag(), "Not found element : " + name);
+            return null;
+        }
+    }
+
 
     public WebElement getElementByTagName(WebElement parentElement, String name) {
         try {
@@ -764,10 +774,11 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     }
 
     public void printColor(String message, Color color) {
-        printColor(message,color,null);
+        printColor(message, color, null);
     }
-    public void printColor(String message, Color color,String bgColor) {
-        updateListView(message, color,bgColor);
+
+    public void printColor(String message, Color color, String bgColor) {
+        updateListView(message, color, bgColor);
         Logger.d(getTag(), message);
     }
 
@@ -840,7 +851,8 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         actionObject.perform();
     }
 
-    public void updateApi(){}
+    public void updateApi() {
+    }
 
     public void tryClick(WebElement element, int height) {
         boolean clickable;
@@ -858,6 +870,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     }
 
     int numberRetry = 10;
+
     public WebElement checkDoneBy(By by, String tag, int numberRetry) throws InterruptedException {
         WebElement element;
         int count = 1;
@@ -955,6 +968,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         WebElement element = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(identifier));
         return element;
     }
+
     public void screenShotFull(String nameFile) {
         try {
             String pathSaveImage = System.getProperty("user.dir") + "/data/capture/" + nameFile + "_" + System.currentTimeMillis() + ".jpg";
@@ -962,18 +976,18 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
             TakesScreenshot s = (TakesScreenshot) webDriver;
             File source = s.getScreenshotAs(OutputType.FILE);
             FileUtils.copyFile(source, new File(pathSaveImage));
-            print("ScreenShot " +  pathSaveImage);
+            print("ScreenShot " + pathSaveImage);
         } catch (Exception e) {
             printException(e);
         }
     }
 
-    public void screenShotBy(WebElement element,String nameFile){
+    public void screenShotBy(WebElement element, String nameFile) {
         try {
             String pathSaveImage = System.getProperty("user.dir") + "/data/capture/" + nameFile + "_" + System.currentTimeMillis() + ".jpg";
             File source = element.getScreenshotAs(OutputType.FILE);
             FileUtils.copyFile(source, new File(pathSaveImage));
-            print("ScreenShot " +  pathSaveImage);
+            print("ScreenShot " + pathSaveImage);
         } catch (IOException e) {
             printException(e);
         }
