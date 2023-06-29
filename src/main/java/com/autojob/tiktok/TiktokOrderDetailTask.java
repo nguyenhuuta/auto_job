@@ -43,7 +43,7 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
      * 2: Lấy đơn hàng chưa gửi lời cảm ơn
      */
     List<String> orderStringByType() throws InterruptedException {
-        Call<BaseResponse<List<String>>> call = ApiManager.BICA_ENDPOINT.orderNeedBuyerPhone(accountModel.shopId, 1);
+        Call<BaseResponse<List<String>>> call = ApiManager.BICA_ENDPOINT.orderIdsByType(accountModel.shopId, 1);
         return RequestQueue.getInstance().executeRequest(call);
     }
 

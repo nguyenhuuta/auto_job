@@ -6,6 +6,7 @@ import com.autojob.base.WebDriverCallback;
 import com.autojob.model.entities.TiktokAffiliateOrderBody;
 import com.autojob.model.entities.AccountModel;
 import com.autojob.model.entities.BaseResponse;
+import com.autojob.utils.ColorConst;
 import javafx.scene.paint.Color;
 import org.apache.commons.lang3.SystemUtils;
 import org.openqa.selenium.By;
@@ -59,14 +60,11 @@ class TiktokAffiliateOrderTask extends BaseTiktokTask {
     @Override
     public void run() {
         try {
-//            orderIds = orderIdsByType();
-//            printColor("LIST ĐƠN HÀNG: " + orderIds.size(), Color.WHITE, ColorConst.blueviolet);
-//            if (orderIds.isEmpty()) {
-//                return;
-//            }
-            orderIds.add("577477771816110513");
-            orderIds.add("577480180994902440");
-            orderIds.add("577480232887420959");
+            orderIds = orderIdsByType();
+            printColor("LIST ĐƠN HÀNG: " + orderIds.size(), Color.WHITE, ColorConst.blueviolet);
+            if (orderIds.isEmpty()) {
+                return;
+            }
             openAffiliatePage();
 
         } catch (Exception e) {
@@ -147,7 +145,7 @@ class TiktokAffiliateOrderTask extends BaseTiktokTask {
                 if (creatorArray.length != 2) {
                     throw new InterruptedException("creators != 2");
                 }
-                String creator = creatorArray[0];
+                String creator = creatorArray[0].replace("@", "");
                 String sourOrder = elements.get(11).getText();
                 int discount = Integer.parseInt(elements.get(14).getText().replace("₫", ""));
                 printColor(creator + " - " + sourOrder + " -" + discount, Color.GREEN);
@@ -159,6 +157,8 @@ class TiktokAffiliateOrderTask extends BaseTiktokTask {
                     type = 1;
                 } else if ("Video".equals(sourOrder)) {
                     type = 2;
+                } else if ("Trưng bày".equals(sourOrder)) {
+                    type = 3;
                 }
                 orderBody.sourceOrder = type;
                 orderBody.affiliateId = creator;

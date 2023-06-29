@@ -45,7 +45,7 @@ class TiktokSendThanksTask extends BaseTiktokTask {
      * @return
      */
     List<String> orderStringByType() throws InterruptedException {
-        Call<BaseResponse<List<String>>> call = ApiManager.BICA_ENDPOINT.orderNeedBuyerPhone(accountModel.shopId, 2);
+        Call<BaseResponse<List<String>>> call = ApiManager.BICA_ENDPOINT.orderIdsByType(accountModel.shopId, 2);
         return RequestQueue.getInstance().executeRequest(call);
     }
 
@@ -136,7 +136,7 @@ class TiktokSendThanksTask extends BaseTiktokTask {
                 } while (chatSVG == null);
 
                 print("Đợi click chat");
-                tryClick(chatIcon,100);
+                tryClick(chatIcon, 100);
 
                 String buyerName = chatIcon.getText();
                 System.out.println("buyerName " + buyerName);
@@ -184,14 +184,19 @@ class TiktokSendThanksTask extends BaseTiktokTask {
             String[] array = message();
             WebElement buyerNameElement;
             String text = "";
+            int count = 0;
             do {
                 delaySecond(2);
                 buyerNameElement = checkDoneBy(By.xpath("//div[contains(@class, 'FOIFN_')]"), "BuyerName");
                 if (buyerNameElement != null) {
                     text = buyerNameElement.getText();
+                    if (count == 5) {
+                        buyerName = text;
+                    }
                     print("new Buyer: " + text + "/" + buyerName);
-
+                    count++;
                 }
+                count++;
             } while (!buyerName.equals(text));
             WebElement textArea = checkDoneBy(By.xpath("//*[@id='chat-input-textarea']/textarea"), "ChatInput", 10);
             print("Hiển thị chat thành công");
