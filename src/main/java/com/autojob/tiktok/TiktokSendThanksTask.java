@@ -8,6 +8,7 @@ import com.autojob.model.entities.BaseResponse;
 import com.autojob.model.entities.TiktokOrderRateBody;
 import com.autojob.utils.ColorConst;
 import javafx.scene.paint.Color;
+import org.apache.commons.lang3.SystemUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
@@ -108,15 +109,9 @@ class TiktokSendThanksTask extends BaseTiktokTask {
                 WebElement inputSearch = checkDoneBy(By.cssSelector("input[data-dtid='order.filter_area.input.main_order_id']"), "InputSearch");
                 inputSearch.click();
                 delayMilliSecond(500);
-                try {
-                    WebElement clear = getElementByClassName("arco-input-clear-icon");
-                    if (clear != null) {
-                        clear.click();
-                        print("Xóa đơn hàng cũ");
-                    }
-                } catch (Exception e) {
-                    throw new InterruptedException("Button clear text click lỗi " + e);
-                }
+                Keys key = SystemUtils.IS_OS_WINDOWS ? Keys.CONTROL : Keys.COMMAND;
+                inputSearch.sendKeys(Keys.chord(key, "a", Keys.DELETE));
+                print("Xoá kết quả cũ");
                 delayMilliSecond(500);
                 inputSearch.sendKeys(orderId);
                 delayMilliSecond(400);
@@ -145,7 +140,7 @@ class TiktokSendThanksTask extends BaseTiktokTask {
                 bodyThanks.orderId = orderId;
                 bodyThanks.sendThanks = true;
                 jsonArray.add(bodyThanks);
-                if (jsonArray.size() == 10) {
+                if (jsonArray.size() >= 10) {
                     updateOrderToServer();
                 }
             } catch (Exception e) {

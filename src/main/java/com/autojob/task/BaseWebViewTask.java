@@ -854,8 +854,9 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
     public void updateApi() {
     }
 
-    public void tryClick(WebElement element, int height) {
+    public void tryClick(WebElement element, int height) throws InterruptedException {
         boolean clickable;
+        int count = 0;
         do {
             try {
                 print("Click " + element.getText());
@@ -864,7 +865,11 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
             } catch (Exception ex) {
                 clickable = false;
                 scrollBy(height);
-                delayMilliSecond(500);
+                delayMilliSecond(1000);
+            }
+            count++;
+            if(count >= 10){
+                throw new InterruptedException("Thử click không thành công");
             }
         } while (!clickable);
     }
