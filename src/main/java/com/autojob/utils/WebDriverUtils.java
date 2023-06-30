@@ -9,12 +9,16 @@ import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.html5.LocalStorage;
 import org.openqa.selenium.html5.WebStorage;
+import org.openqa.selenium.logging.LogType;
+import org.openqa.selenium.logging.LoggingPreferences;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
 
 public class WebDriverUtils {
 
@@ -131,7 +135,17 @@ public class WebDriverUtils {
         chromeOptions.addArguments("--disable-blink-features=AutomationControlled");
         chromeOptions.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
         chromeOptions.setExperimentalOption("useAutomationExtension", false);
-        webDriver = new ChromeDriver(chromeOptions);
+
+
+        DesiredCapabilities capabilities = DesiredCapabilities.chrome();
+        LoggingPreferences logPrefs = new LoggingPreferences();
+        logPrefs.enable(LogType.PERFORMANCE, Level.ALL);
+//        capabilities.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
+        capabilities.setCapability("goog:loggingPrefs", logPrefs);
+        capabilities.setCapability(ChromeOptions.CAPABILITY, chromeOptions);
+        webDriver = new ChromeDriver(capabilities);
+
+//        webDriver = new ChromeDriver(chromeOptions);
         synchronized (webDriverList) {
             webDriverList.add(webDriver);
         }

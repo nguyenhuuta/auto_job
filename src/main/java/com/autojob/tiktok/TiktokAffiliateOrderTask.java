@@ -9,12 +9,20 @@ import com.autojob.model.entities.BaseResponse;
 import com.autojob.utils.ColorConst;
 import javafx.scene.paint.Color;
 import org.apache.commons.lang3.SystemUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.logging.LogEntries;
+import org.openqa.selenium.logging.LogEntry;
+import org.openqa.selenium.logging.LogType;
 import retrofit2.Call;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -65,6 +73,12 @@ class TiktokAffiliateOrderTask extends BaseTiktokTask {
             if (orderIds.isEmpty()) {
                 return;
             }
+//            orderIds.clear();
+//            orderIds.add("577491039904762048");
+//            orderIds.add("577480232197261318");
+//            orderIds.add("577492827605535696");
+//            orderIds.add("577492827605535690");
+
             openAffiliatePage();
 
         } catch (Exception e) {
@@ -114,7 +128,7 @@ class TiktokAffiliateOrderTask extends BaseTiktokTask {
                 inputSearch.sendKeys(order);
                 delayMilliSecond(300);
                 inputSearch.sendKeys(Keys.ENTER);
-                delaySecond(4);
+                delaySecond(6);
                 WebElement loading;
                 do {
                     loading = getElementByClassName("m4b-base-spin-loading-layer");
@@ -134,21 +148,25 @@ class TiktokAffiliateOrderTask extends BaseTiktokTask {
                     continue;
                 }
 
-                List<WebElement> elements = elementsByTagName("td");
-                if (elements == null || elements.size() != 19) {
-                    String name = accountModel.shopName + System.currentTimeMillis();
-                    screenShotFull(name);
-                    throw new InterruptedException("Kết quả = null hoặc != 19, chụp ảnh với tên " + name);
+                List<WebElement> elements = getElementsByClassName("m4b-base-table-content-inner");
+                if (elements == null || elements.size() != 2) {
+                    throw new InterruptedException("m4b-base-table-content-inner null or != 2 " + elements);
                 }
-                String creators = elements.get(10).getText();
-                String[] creatorArray = creators.split("\\r?\\n");
-                if (creatorArray.length != 2) {
-                    throw new InterruptedException("creators != 2");
+                WebElement element = elements.get(1);
+
+                List<WebElement> elementLis = element.findElements(By.cssSelector("tbody > tr"));
+                if (elementLis == null) {
+                    throw new InterruptedException("Item order null");
                 }
-                String creator = creatorArray[0].replace("@", "");
-                String sourOrder = elements.get(11).getText();
-                int discount = Integer.parseInt(elements.get(14).getText().replace("₫", ""));
-                printColor(creator + " - " + sourOrder + " -" + discount, Color.GREEN);
+                String creator = "", sourOrder = "";
+                int discount = 0;
+                for (WebElement e : elementLis) {
+                    List<String> text = Arrays.asList(e.getText().split("\n"));
+                    creator = text.get(5).replace("@", "");
+                    sourOrder = text.get(7);
+                    discount += Integer.parseInt(text.get(10).replace("₫", ""));
+                }
+                printColor(creator + " | " + sourOrder + " | " + discount, Color.YELLOWGREEN);
                 delaySecond(5);
                 TiktokAffiliateOrderBody orderBody = new TiktokAffiliateOrderBody();
                 orderBody.orderId = order;
@@ -174,6 +192,46 @@ class TiktokAffiliateOrderTask extends BaseTiktokTask {
         }
         updateOrderToServer();
 
+    }
+
+    public void clearConsoleErrors() {
+        System.out.println("CLEAR LOG");
+        JavascriptExecutor js = (JavascriptExecutor) webDriver;
+        String script = "console.clear();";
+        js.executeScript(script);
+        LogEntries logs = webDriver.manage().logs().get(LogType.PERFORMANCE);
+    }
+
+    void checkDone() {
+        LogEntries logs = webDriver.manage().logs().get(LogType.PERFORMANCE);
+        for (Iterator<LogEntry> it = logs.iterator(); it.hasNext(); ) {
+            LogEntry entry = it.next();
+
+            try {
+                JSONObject json = new JSONObject(entry.getMessage());
+
+                JSONObject message = json.getJSONObject("message");
+                String method = message.getString("method");
+
+                if ("Network.responseReceived".equals(method)) {
+                    JSONObject params = message.getJSONObject("params");
+                    JSONObject response = params.getJSONObject("response");
+                    String messageUrl = response.getString("url");
+                    String url = "https://affiliate.tiktok.com/api/v1/affiliate/orders";
+                    status = response.getInt("status");
+                    if (messageUrl.contains(url)) {
+                        log(method + "/" + status + " / " + messageUrl);
+                    }
+
+                    if (messageUrl.contains(url) && status == 200) {
+                        print("LOAD DONE");
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        clearConsoleErrors();
     }
 
     @Override

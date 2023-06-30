@@ -155,7 +155,7 @@ public class HomeController implements Initializable, WebDriverCallback {
                     @Override
                     public void onNext(AccountModel account) {
                         try {
-//                            if (account.shopId == 2) {
+//                            if (account.shopId == 6) {
 //                                return;
 //                            }
                             BaseController controller = new TiktokController(account, HomeController.this);
