@@ -105,6 +105,12 @@ class TiktokAffiliateOrderTask extends BaseTiktokTask {
             throw new InterruptedException("Tag li is NUll or size != 4 " + li);
         }
         delaySecond(2);
+        String textDropdown = comboBox.getText();
+        boolean isValid = "ID đơn hàng".equals(textDropdown) || "Order ID".equals(textDropdown);
+        if (!isValid) {
+            screenShotFull("affiliate");
+            throw new InterruptedException("Không thể chọn ID đơn hàng affiliate");
+        }
         WebElement inputSearch = getElementByXpath("//input[@placeholder='Search orders' or @placeholder='Tìm kiếm đơn hàng']");
         if (inputSearch == null) {
             throw new InterruptedException("InputSearch Not Found");
