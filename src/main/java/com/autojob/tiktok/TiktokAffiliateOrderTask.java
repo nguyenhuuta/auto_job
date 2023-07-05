@@ -107,7 +107,10 @@ class TiktokAffiliateOrderTask extends BaseTiktokTask {
         delaySecond(2);
         String textDropdown = comboBox.getText();
         boolean isValid = "ID đơn hàng".equals(textDropdown) || "Order ID".equals(textDropdown);
-        if (!isValid) {
+        if(isValid){
+            print("Chọn " + textDropdown);
+        }else{
+            printColor("Chọn " + textDropdown, Color.RED);
             screenShotFull("affiliate");
             throw new InterruptedException("Không thể chọn ID đơn hàng affiliate");
         }
