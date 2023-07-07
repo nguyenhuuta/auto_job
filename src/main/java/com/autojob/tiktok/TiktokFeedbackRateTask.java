@@ -39,7 +39,7 @@ class TiktokFeedbackRateTask extends BaseTiktokTask {
     public void run() {
         try {
             printColor("BẮT ĐẦU", Color.WHITE, ColorConst.blueviolet);
-            List<WebElement> listRate = openUrlByList(URL_RATE, By.className("arco-tag-checkable"), "STAR LIST", false);
+            List<WebElement> listRate = openUrlByList(URL_RATE, By.xpath("//button[@data-tid='m4b_button_toggle_button']"), "STAR LIST", false);
             if (listRate.size() != 7) {
                 throw new InterruptedException("Size != 7");
             }
@@ -64,7 +64,7 @@ class TiktokFeedbackRateTask extends BaseTiktokTask {
                 WebElement start = rangeDate.get(0);
                 start.click();
                 delaySecond(2);
-                WebElement today = checkDoneBy(By.className("product-arco-picker-cell-today"),"CurrentDay");
+                WebElement today = checkDoneBy(By.className("theme-arco-picker-cell-today"),"CurrentDay");
                 today.click();
                 delaySecond(2);
                 today.click();
@@ -148,7 +148,7 @@ class TiktokFeedbackRateTask extends BaseTiktokTask {
     private void sendFeedback(WebElement buttonFeedback, int start) {
         try {
             buttonFeedback.click();
-            WebElement dialog = checkDoneBy(By.className("arco-modal-content"), "DialogFeedback");
+            WebElement dialog = checkDoneBy(By.xpath("//div[@role='dialog']"), "DialogFeedback");
             List<WebElement> textAreas = getElementsByTagName(dialog, "textarea");
             WebElement buttonSend = getElementByXpath("//span[contains(text(), 'Gửi')]");
             if (buttonSend == null) {

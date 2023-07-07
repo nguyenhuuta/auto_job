@@ -26,7 +26,7 @@ import java.util.concurrent.Executors;
  */
 public class TiktokaaaController extends BaseWebViewTask {
     static final String TIKTOK_URL = "https://www.tiktok.com/vi-VN";
-    private ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     @Override
     public String getTag() {

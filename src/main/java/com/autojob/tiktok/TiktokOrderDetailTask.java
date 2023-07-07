@@ -77,9 +77,9 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
             RequestQueue.getInstance().executeRequest(call);
             printGreen("Cập nhật lên server thành công");
             jsonArray.clear();
-            String url = randomURL();
-            load(url);
-            delaySecond(60);
+//            String url = randomURL();
+//            load(url);
+//            delaySecond(60);
         } catch (InterruptedException e) {
             e.printStackTrace();
             printE("updateOrderToServer lỗi");

@@ -67,7 +67,7 @@ public class TiktokParentTask extends TimerTask {
         webDriverCallback.expiredCookie(accountModel);
         sendThankTask.run();
         orderDetailTask.run();
-        if (hour % 6 == 0 && minute < 30) {
+        if (hour % 6 == 0 && minute < 59) {
             feedbackRating.run();
         }
         affiliateTask.run();
