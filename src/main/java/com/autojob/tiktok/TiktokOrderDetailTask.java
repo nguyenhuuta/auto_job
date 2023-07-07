@@ -142,7 +142,7 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
     private String getBuyerPhone() {
         WebElement element;
         try {
-            element = checkDoneBy(By.className("order-arco-icon-eyeInvisible"), "Icon Eye");
+            element = checkDoneBy(By.className("order-arco-icon-eye-invisible"), "Icon Eye");
             element.click();
             delaySecond(3);
             element = getElementByClassName("order-arco-icon-eye");
