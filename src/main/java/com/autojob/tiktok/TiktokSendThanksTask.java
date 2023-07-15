@@ -131,7 +131,8 @@ class TiktokSendThanksTask extends BaseTiktokTask {
                 } while (chatSVG == null);
 
                 print("Đợi click chat");
-                tryClick(chatIcon, 100);
+                scrollToElement(chatIcon);
+                chatIcon.click();
 
                 String buyerName = chatIcon.getText();
                 System.out.println("buyerName " + buyerName);

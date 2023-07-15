@@ -6,8 +6,6 @@ import com.autojob.model.entities.AccountModel;
 import com.autojob.model.entities.ChromeSetting;
 import com.autojob.model.entities.MessageListView;
 import com.autojob.utils.*;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.*;
@@ -15,11 +13,9 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import rx.subjects.PublishSubject;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -232,18 +228,12 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         }
     }
 
-    protected final void scrollToElement(WebElement element) {
-        try {
-//            Actions actions = new Actions(webDriver);
-//            actions.moveToElement(element);
-//            actions.perform();
-
-
-            getJavascriptExecutor().executeScript("arguments[0].scrollIntoView(true);", element);
-            delayMilliSecond(500);
-        } catch (Exception e) {
-            Logger.warning(getTag(), e.getClass().getSimpleName() + ": " + e.getMessage());
-        }
+    public void scrollToElement(WebElement element) {
+        String scrollElementIntoMiddle = "var viewPortHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);"
+                + "var elementTop = arguments[0].getBoundingClientRect().top;"
+                + "window.scrollBy(0, elementTop-(viewPortHeight/2));";
+        getJavascriptExecutor().executeScript(scrollElementIntoMiddle, element);
+        delaySecond(2);
     }
 
     protected final void scrollBy(int y) {
@@ -361,32 +351,6 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         return WebDriverUtils.isElementPresentAndDisplayed(element);
     }
 
-    protected final void openUrl(String url) {
-        openUrl(url, 1);
-    }
-
-    private void openUrl(String url, int time) {
-        if (!isValidTaskInRunning()) return;
-        Logger.d(getTag(), "openUrl " + url + " - time " + time);
-        try {
-            getWebDriver().get(url);
-        } catch (Exception ex) {
-            Logger.error("Open url exception", ex);
-            if (ex.getMessage().contains("unexpected alert open")) {
-                closeAlert();
-                openUrl(url, time + 1);
-            } else if (time <= 2) {
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                openUrl(url, time + 1);
-            } else {
-                throw ex;
-            }
-        }
-    }
 
     protected boolean closeAlert() {
         try {
@@ -868,7 +832,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
                 delayMilliSecond(1000);
             }
             count++;
-            if(count >= 10){
+            if (count >= 10) {
                 throw new InterruptedException("Thử click không thành công");
             }
         } while (!clickable);

@@ -7,6 +7,7 @@ import com.autojob.utils.TimeUtils;
 import com.autojob.utils.Utils;
 import javafx.scene.paint.Color;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
@@ -58,17 +59,16 @@ class TiktokFeedbackRateTask extends BaseTiktokTask {
             delayMilliSecond(timeDelay);
             checkDoneListBy(By.xpath("//div[contains(@class, 'ratingListItem')]"), "Rate");
             hidePopupReplyLate();
-
-            List<WebElement> rangeDate = getElementsByXpath("//input[@placeholder='Từ' or @placeholder='Đến']");
-            if (rangeDate != null && rangeDate.size() == 2) {
-                WebElement start = rangeDate.get(0);
-                start.click();
-                delaySecond(2);
-                WebElement today = checkDoneBy(By.className("theme-arco-picker-cell-today"),"CurrentDay");
-                today.click();
-                delaySecond(2);
-                today.click();
-            }
+//            List<WebElement> rangeDate = getElementsByXpath("//input[@placeholder='Từ' or @placeholder='Đến']");
+//            if (rangeDate != null && rangeDate.size() == 2) {
+//                WebElement start = rangeDate.get(0);
+//                start.click();
+//                delaySecond(2);
+//                WebElement today = checkDoneBy(By.className("theme-arco-picker-cell-today"),"CurrentDay");
+//                today.click();
+//                delaySecond(2);
+//                today.click();
+//            }
 
             List<WebElement> listRating = checkDoneListBy(By.xpath("//div[contains(@class, 'ratingListItem')]"), "Rate");
             List<WebElement> listOrderId = getElementsByXpath("//div[contains(@class, 'productItemInfoOrderIdText')]");
@@ -147,8 +147,9 @@ class TiktokFeedbackRateTask extends BaseTiktokTask {
 
     private void sendFeedback(WebElement buttonFeedback, int start) {
         try {
+            scrollToElement(buttonFeedback);
             buttonFeedback.click();
-            WebElement dialog = checkDoneBy(By.xpath("//div[@role='dialog']"), "DialogFeedback");
+            WebElement dialog = checkDoneBy(By.xpath("//div[@role='dialog']"), "DialogFeedback", 4);
             List<WebElement> textAreas = getElementsByTagName(dialog, "textarea");
             WebElement buttonSend = getElementByXpath("//span[contains(text(), 'Gửi')]");
             if (buttonSend == null) {

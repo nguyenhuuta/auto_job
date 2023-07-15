@@ -111,10 +111,10 @@ public class HomeController implements Initializable, WebDriverCallback {
                                 setText(item.message);
                                 setTextFill(item.color);
                                 String test;
-                                if(item.bgColor == null){
-                                    test = String.format("-fx-background-color: %s;font-family: Helvetica; -fx-font-size: 14px;","white");
-                                }else{
-                                    test = String.format("-fx-background-color: %s;font-family: Helvetica; -fx-font-size: 14px;", "linear-gradient(to right, #fc466b, #3f5efb)");
+                                if (item.bgColor == null) {
+                                    test = String.format("-fx-background-color: %s;font-family: Helvetica; -fx-font-size: 12px;", "white");
+                                } else {
+                                    test = String.format("-fx-background-color: %s;font-family: Helvetica; -fx-font-size: 12px;", "linear-gradient(to right, #fc466b, #3f5efb)");
                                 }
                                 setStyle(test);
 

@@ -143,6 +143,7 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
         WebElement element;
         try {
             element = checkDoneBy(By.className("order-arco-icon-eye-invisible"), "Icon Eye");
+            scrollToElement(element);
             element.click();
             delaySecond(3);
             element = getElementByClassName("order-arco-icon-eye");
