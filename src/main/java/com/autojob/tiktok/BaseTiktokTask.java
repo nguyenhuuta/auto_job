@@ -21,7 +21,7 @@ abstract class BaseTiktokTask extends BaseWebViewTask {
      * Ẩn popup hỏi "trả lời khách hàng luôn"
      */
     public void hidePopupReplyLate() {
-        WebElement popup = getElementByClassName("arco-popover-content");
+        WebElement popup = getElementByClassName("theme-arco-popover-content");
         if (popup != null) {
             print("Hiển thị popup trả lời tin nhắn");
             try {
