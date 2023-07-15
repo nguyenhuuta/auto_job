@@ -3,7 +3,6 @@ package com.autojob.tiktok;
 import com.autojob.base.WebDriverCallback;
 import com.autojob.model.entities.AccountModel;
 import com.autojob.task.BaseWebViewTask;
-import com.autojob.task.ILoadDonePage;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -60,7 +59,7 @@ abstract class BaseTiktokTask extends BaseWebViewTask {
 
     WebElement openUrl(String url, By by, String tag, int numberRetry) throws InterruptedException {
         load(url);
-        WebElement element = checkDoneBy(by, tag,numberRetry);
+        WebElement element = checkDoneBy(by, tag, numberRetry);
         hidePopupReplyLate();
         return element;
     }

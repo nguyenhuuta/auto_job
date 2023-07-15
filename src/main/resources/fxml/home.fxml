@@ -38,9 +38,15 @@
                             </Tab>
                             <Tab text="Shopee">
                                 <content>
-                                    <HBox fx:id="containerShopee" layoutX="67.0" layoutY="35.0" prefHeight="100.0"
+                                    <VBox fx:id="containerShopee" layoutX="67.0" layoutY="35.0" prefHeight="100.0"
                                           prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                                          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+                                          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                        <HBox fx:id="shopeeListView" VBox.vgrow="ALWAYS"/>
+                                        <HBox fx:id="shopeeAccount" fillHeight="false" prefHeight="35.0"
+                                              spacing="20"
+                                              style="-fx-background-color: linear-gradient(to left, #FF7449, #4A0CAE)"
+                                              alignment="CENTER_LEFT"/>
+                                    </VBox>
                                 </content>
                             </Tab>
                         </TabPane>

@@ -4,8 +4,6 @@ import com.autojob.base.BaseController;
 import com.autojob.base.WebDriverCallback;
 import com.autojob.model.entities.AccountModel;
 
-import java.util.concurrent.Executors;
-
 /**
  * Created by OpenYourEyes on 15/05/2023
  */

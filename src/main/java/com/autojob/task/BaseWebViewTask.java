@@ -838,7 +838,7 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         } while (!clickable);
     }
 
-    int numberRetry = 10;
+    public int numberRetry = 10;
 
     public WebElement checkDoneBy(By by, String tag, int numberRetry) throws InterruptedException {
         WebElement element;
