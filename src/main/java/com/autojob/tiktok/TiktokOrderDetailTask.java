@@ -118,15 +118,13 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
                 openUrl(url, By.xpath("//div[contains(@class, 'IMICon__IMIconBackground')]"), "Icon Chat", 15);
                 delaySecond(2);
                 String phone = getBuyerPhone();
-                if (phone.isEmpty()) {
-                    phone = "Không lấy được phone";
+                if (!phone.isEmpty()) {
+                    print("SĐT: " + phone);
+                    TiktokOrderRateBody body = new TiktokOrderRateBody();
+                    body.orderId = orderId;
+                    body.buyerPhone = phone;
+                    jsonArray.add(body);
                 }
-                print("SĐT: " + phone);
-                TiktokOrderRateBody body = new TiktokOrderRateBody();
-                body.orderId = orderId;
-                body.buyerPhone = phone;
-                jsonArray.add(body);
-
                 if (jsonArray.size() == 10) {
                     updateOrderToServer();
                 }
@@ -140,18 +138,24 @@ class TiktokOrderDetailTask extends BaseTiktokTask {
     }
 
     private String getBuyerPhone() {
-        WebElement element;
         try {
-            element = checkDoneBy(By.className("order-arco-icon-eye-invisible"), "Icon Eye");
-            scrollToElement(element);
-            element.click();
-            delaySecond(3);
-            element = getElementByClassName("order-arco-icon-eye");
-            if (element == null) {
-                throw new InterruptedException("Click eye: không tìm thấy element SDT");
+            WebElement shippingAddress = checkDoneBy(By.xpath("//div[contains(@class, 'ShippingAddress')]"), "ShippingAddress");
+            List<WebElement> divs = getElementsByTagName(shippingAddress, "div");
+            if (divs.size() != 4) {
+                printE("Lỗi div !=4");
+                return "";
             }
-            WebElement parentElement = element.findElement(By.xpath("./.."));
-            return parentElement.getText();
+            WebElement phone = divs.get(1);
+            WebElement iconEye = getElementByTagName(shippingAddress, "svg");
+            if (iconEye == null) {
+                printE("IconEye null");
+                return "";
+            }
+            scrollToElement(iconEye);
+            iconEye.click();
+            delaySecond(3);
+//            WebElement parentElement = iconEye.findElement(By.xpath("./.."));
+            return phone.getText();
         } catch (InterruptedException e) {
             printE(e.getMessage());
             return "";

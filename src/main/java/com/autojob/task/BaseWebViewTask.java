@@ -869,8 +869,9 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
         int count = 1;
         do {
             if (count > numberRetry) {
-                printE("CheckDoneBy: " + tag + " Hết số lần thử");
+                printE("CheckDoneBy: " + tag + " Hết số lần thử, đợi 12s");
                 playSoundError();
+                delaySecond(10);
             }
             delaySecond(2);
             try {

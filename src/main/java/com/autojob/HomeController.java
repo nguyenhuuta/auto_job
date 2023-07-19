@@ -190,11 +190,11 @@ public class HomeController implements Initializable, WebDriverCallback {
                         try {
                             int type = account.type;
                             if (type == 1) { // Shopee
-                                BaseController controller = new ShopeeController(account, HomeController.this);
-                                controllers.put(account.shopName, controller);
-                                controller.runNow();
+//                                BaseController controller = new ShopeeController(account, HomeController.this);
+//                                controllers.put(account.shopName, controller);
+//                                controller.runNow();
                             } else if (type == 2) { // TIKTOK
-//                                if (account.shopId == 6) {
+//                                if (account.shopId != 2) {
 //                                    return;
 //                                }
                                 BaseController controller = new TiktokController(account, HomeController.this);

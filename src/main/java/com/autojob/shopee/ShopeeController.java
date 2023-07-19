@@ -91,7 +91,9 @@ public class ShopeeController extends BaseController {
     }
 
     private void checkLogin() {
+        System.out.println("CheckLogin");
         sendThankTask.load(ShopeeSendThanksTask.SHOPEE_ORDER_COMPLETE);
+        sendThankTask.delaySecond(5);
         String currentUrl = sendThankTask.webDriver.getCurrentUrl();
         System.out.println(currentUrl);
         boolean needLogin = currentUrl.contains("login");
@@ -101,8 +103,9 @@ public class ShopeeController extends BaseController {
             sendThankTask.printE(accountModel.shopName + " CHƯA LOGIN, YÊU CẦU LOGIN");
             do {
                 sendThankTask.print("đợi 60s");
-                sendThankTask.delaySecond(60);
+                sendThankTask.delaySecond(20);
                 currentUrl = sendThankTask.webDriver.getCurrentUrl();
+                System.out.println(currentUrl);
                 needLogin = currentUrl.contains("login");
             } while (needLogin);
             sendThankTask.delaySecond(10);
