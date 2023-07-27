@@ -63,10 +63,10 @@ public class ShopeeSendThanksTask extends BaseShopeeTask {
                     scrollToElement(item);
                     WebElement orderElement = getElementByClassName(item, "orderid");
                     String orderId = orderElement.getText();
-                    if (accountModel.lastOrderId.equals(orderId)) {
-                        print("ĐẾN LAST ORDER");
-                        return;
-                    }
+//                    if (accountModel.lastOrderId.equals(orderId)) {
+//                        print("ĐẾN LAST ORDER");
+//                        return;
+//                    }
                     String userName = getElementByClassName(item, "username").getText();
                     String format = String.format("============ %s| %s ============", (count + 1), userName + "|" + orderId);
                     print(format);
@@ -199,14 +199,14 @@ public class ShopeeSendThanksTask extends BaseShopeeTask {
 
 
     void updateAccountShopee(String orderId) {
-        AccountBody body = new AccountBody(orderId, accountModel.rowId);
-        try {
-            Call<BaseResponse<String>> call = ApiManager.GOOGLE_ENDPOINT.updateAccountShopee(ApiManager.URL_GOOGLE_SHEET, body);
-            String message = RequestQueue.getInstance().executeRequest(call);
-            printColor("Lưu " + orderId + " lên GoogleDriver " + message, Color.GREEN);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//        AccountBody body = new AccountBody(orderId, accountModel.rowId);
+//        try {
+//            Call<BaseResponse<String>> call = ApiManager.GOOGLE_ENDPOINT.updateAccountShopee(ApiManager.URL_GOOGLE_SHEET, body);
+//            String message = RequestQueue.getInstance().executeRequest(call);
+//            printColor("Lưu " + orderId + " lên GoogleDriver " + message, Color.GREEN);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
     }
 
 

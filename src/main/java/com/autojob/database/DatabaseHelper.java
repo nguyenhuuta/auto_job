@@ -3,10 +3,12 @@ package com.autojob.database;
 import com.autojob.database.core.Cursor;
 import com.autojob.database.core.CustomStatement;
 import com.autojob.model.entities.AccountModel;
+import javafx.util.Pair;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DatabaseHelper {
 
@@ -73,66 +75,71 @@ public class DatabaseHelper {
 
     public void insertAccount(AccountModel accountModel) {
         try {
-
             String sql = "INSERT INTO " + DataContract.Account.TABLE_NAME
                     + " ("
-                    + DataContract.Account.shopId + ","
                     + DataContract.Account.shopName + ","
-                    + DataContract.Account.type + ","
-                    + DataContract.Account.lastOrderId + ","
-                    + DataContract.Account.rowId
+                    + DataContract.Account.shopId + ","
+                    + DataContract.Account.type
                     + ")"
-                    + " VALUES (?,?,?,?,?)";
+                    + " VALUES (?,?,?)";
 
             PreparedStatement pstmt = connection.prepareStatement(sql);
-            pstmt.setInt(1, accountModel.shopId);
-            pstmt.setString(2, accountModel.shopName);
+            pstmt.setString(1, accountModel.shopName);
+            pstmt.setInt(2, accountModel.shopId);
             pstmt.setInt(3, accountModel.type);
-            pstmt.setString(4, accountModel.lastOrderId);
-            pstmt.setString(5, accountModel.rowId);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println("SQLException insertTransaction " + e.toString());
         }
     }
 
-    public void getAccount() {
+    public void updateOrderSendVoucherAccount(AccountModel account) {
+        try {
+            String sql = "UPDATE %s SET %s = %s WHERE %s = %s";
+            String fullSQL = String.format(sql, DataContract.Account.TABLE_NAME, DataContract.Account.orderSendVoucher, account.currentOrderId, DataContract.Account.shopName, "'" + account.shopName + "'");
+            connection.createStatement().execute(fullSQL);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
+    public List<Pair<Integer, String>> getOrderSendVoucher() {
         try {
             String query = "SELECT * FROM " + DataContract.Account.TABLE_NAME;
-            PreparedStatement preparedStatement = DatabaseHelper.getInstance().createPrepareStatement(query);
+            PreparedStatement preparedStatement = createPrepareStatement(query);
             Cursor cursor = new Cursor(preparedStatement.executeQuery());
+            List<Pair<Integer, String>> list = new ArrayList<>();
             if (cursor.moveToFirst()) {
                 do {
-//                    AmazonProduct amazonProduct = new AmazonProduct();
-//                    AccountModel accountModel = new AccountModel();
-//                    amazonProduct.columnId = cursor.getInts(DataContract.Account.COLUMN_ID);
-//                    amazonProduct.setAsinId(cursor.getStrings(DataContract.AmazonProductLocal.COLUMN_ASIN));
-//
-//                    listResult.add(AmazonProduct.fromCursor(cursor));
+                    String orderId = cursor.getStrings(DataContract.Account.orderSendVoucher);
+                    if (orderId != null && !orderId.isEmpty()) {
+                        int shopId = cursor.getInts(DataContract.Account.shopId);
+                        Pair<Integer, String> pair = new Pair<>(shopId, orderId);
+                        list.add(pair);
+                    }
                 } while (cursor.moveToNext());
             } else {
                 cursor.onClose();
             }
+            return list;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
+        return null;
     }
 
     private void createTableAccount(Statement statement) {
         try {
             String sql = "CREATE TABLE IF NOT EXISTS " + DataContract.Account.TABLE_NAME
                     + "("
-                    + DataContract.Account.id + " INTEGER PRIMARY KEY AUTO_INCREMENT,"
+                    + DataContract.Account.shopName + " VARCHAR PRIMARY KEY,"
                     + DataContract.Account.shopId + " INTEGER,"
-                    + DataContract.Account.shopName + " VARCHAR,"
                     + DataContract.Account.type + " INTEGER,"
-                    + DataContract.Account.lastOrderId + " VARCHAR,"
-                    + DataContract.Account.rowId + " VARCHAR"
+                    + DataContract.Account.orderSendVoucher + " VARCHAR NULL"
                     + ")";
             statement.execute(sql);
         } catch (SQLException e) {
+            System.out.println(e);
         }
     }
 

@@ -24,21 +24,26 @@ import java.util.concurrent.TimeUnit;
 public class TiktokParentTask extends TimerTask {
     static final String ENDPOINT = "https://seller-vn.tiktok.com/";
     static final String URL_LOGIN = TiktokParentTask.ENDPOINT + "account/login";
-    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+
     BaseWebViewTask orderDetailTask;
-    BaseWebViewTask sendThankTask;
+    BaseWebViewTask sendThanksTask;
     BaseWebViewTask feedbackRating;
     BaseWebViewTask affiliateTask;
+
+    BaseWebViewTask sendVoucherTask;
 
 
     private final AccountModel accountModel;
     private final WebDriverCallback webDriverCallback;
 
+    boolean isActive = false;
+
     public TiktokParentTask(AccountModel accountModel, WebDriverCallback callback) {
         this.accountModel = accountModel;
         this.webDriverCallback = callback;
         orderDetailTask = new TiktokOrderDetailTask(accountModel, webDriverCallback);
-        sendThankTask = new TiktokSendThanksTask(accountModel, webDriverCallback);
+        sendThanksTask = new TiktokSendMessageTask(accountModel, 2, webDriverCallback);
+        sendVoucherTask = new TiktokSendMessageTask(accountModel, 4, webDriverCallback);
         feedbackRating = new TiktokFeedbackRateTask(accountModel, webDriverCallback);
         affiliateTask = new TiktokAffiliateOrderTask(accountModel, webDriverCallback);
     }
@@ -50,8 +55,16 @@ public class TiktokParentTask extends TimerTask {
 
         System.out.println("Giờ hiện tại " + hour);
         if (hour < 8 || hour > 21) {
-            orderDetailTask.updateListView("Ngoài giờ hoạt động 8h -> 22h");
+            if(isActive && hour > 21){
+                isActive = false;
+                orderDetailTask.updateListView("Ngoài giờ hoạt động 8h -> 22h");
+                WebDriverUtils.quitAll();
+            }
             return;
+        }
+        if(!isActive){
+            isActive = true;
+            startWeb();
         }
         Set<Cookie> cookieSet = orderDetailTask.webDriver.manage().getCookies();
         for (Cookie cookie : cookieSet) {
@@ -63,12 +76,13 @@ public class TiktokParentTask extends TimerTask {
         }
 
         webDriverCallback.expiredCookie(accountModel);
-        sendThankTask.run();
-        orderDetailTask.run();
-        if (hour % 6 == 0 && minute < 59) {
-            feedbackRating.run();
-        }
-        affiliateTask.run();
+//        sendThanksTask.run();
+//        orderDetailTask.run();
+//        if (hour % 6 == 0 && minute < 59) {
+//            feedbackRating.run();
+//        }
+//        affiliateTask.run();
+        sendVoucherTask.run();
         orderDetailTask.load(ENDPOINT + "homepage");
         String text = "LẦN CHẠY TỚI VÀO: " + TimeUtils.addMinute(10);
         orderDetailTask.printColor(text, Color.DARKVIOLET);
@@ -81,9 +95,10 @@ public class TiktokParentTask extends TimerTask {
         WebDriver webDriver = WebDriverUtils.getInstance().createWebDriver(chromeSetting);
         orderDetailTask.print("Start CHROME");
         orderDetailTask.setWebDriver(webDriver);
-        sendThankTask.setWebDriver(webDriver);
+        sendThanksTask.setWebDriver(webDriver);
         feedbackRating.setWebDriver(webDriver);
         affiliateTask.setWebDriver(webDriver);
+        sendVoucherTask.setWebDriver(webDriver);
         checkLogin();
     }
 
@@ -103,7 +118,6 @@ public class TiktokParentTask extends TimerTask {
             orderDetailTask.delaySecond(60);
         }
         webDriverCallback.triggerLogin(accountModel, false);
-        executorService.scheduleWithFixedDelay(this, 0, 10, TimeUnit.MINUTES);
     }
 
     public void bringWebDriverToFront() {

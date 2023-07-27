@@ -2,7 +2,6 @@ package com.autojob;
 
 import com.autojob.database.DatabaseHelper;
 import com.autojob.gui.splash.SplashScreen;
-import com.autojob.shopee.ShopeeFile;
 import com.autojob.utils.IRegisterStopApp;
 import com.autojob.utils.Utils;
 import com.autojob.utils.WebDriverUtils;
@@ -15,15 +14,11 @@ import javafx.stage.Stage;
 import org.apache.commons.lang3.SystemUtils;
 import org.openqa.selenium.chrome.ChromeDriverService;
 import rx.Observable;
-import rx.subjects.PublishSubject;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class App extends Application {
@@ -43,8 +38,7 @@ public class App extends Application {
     }
 
     static {
-        DatabaseHelper.getInstance();
-        ShopeeFile.createFile();
+        DatabaseHelper.getInstance().createTable();
     }
 
     public static void setupWebDriver() {
@@ -113,7 +107,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-//        displaySplashScreen(primaryStage);
+        displaySplashScreen(primaryStage);
         listCallbackRegisterStopApp = new ArrayList<>();
         startApp = true;
         setInstance(this);

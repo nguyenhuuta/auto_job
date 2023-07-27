@@ -4,6 +4,7 @@ import com.autojob.api.ApiManager;
 import com.autojob.api.RequestQueue;
 import com.autojob.base.BaseController;
 import com.autojob.base.WebDriverCallback;
+import com.autojob.database.DatabaseHelper;
 import com.autojob.model.entities.AccountModel;
 import com.autojob.model.entities.BaseResponse;
 import com.autojob.model.entities.MessageListView;
@@ -164,7 +165,7 @@ public class HomeController implements Initializable, WebDriverCallback {
                     Button button = new Button(account.buttonName());
                     button.setUserData(account.shopName);
                     button.setOnAction(event1 -> controllers.get(account.shopName).bringDriverToFront());
-                    buttonMapChrome.put(account.rowId, button);
+                    buttonMapChrome.put(account.shopName, button);
                     Platform.runLater(() -> {
                         if (account.type == 1) {
                             shopeeAccount.getChildren().add(button);
@@ -188,19 +189,26 @@ public class HomeController implements Initializable, WebDriverCallback {
                     @Override
                     public void onNext(AccountModel account) {
                         try {
-                            int type = account.type;
-                            if (type == 1) { // Shopee
-                                BaseController controller = new ShopeeController(account, HomeController.this);
-                                controllers.put(account.shopName, controller);
-                                controller.runNow();
-                            } else if (type == 2) { // TIKTOK
-//                                if (account.shopId != 2) {
-//                                    return;
-//                                }
+//                            int type = account.type;
+//                            if (type == 1) { // Shopee
+//                                BaseController controller = new ShopeeController(account, HomeController.this);
+//                                controllers.put(account.shopName, controller);
+//                                controller.runNow();
+//                            } else if (type == 2) { // TIKTOK
+////                                if (account.shopId != 2) {
+////                                    return;
+////                                }
 //                                BaseController controller = new TiktokController(account, HomeController.this);
 //                                controllers.put(account.shopName, controller);
 //                                controller.runNow();
+//                            }
+                            if (account.shopId != 2) {
+                                return;
                             }
+                            DatabaseHelper.getInstance().insertAccount(account);
+                            BaseController controller = new TiktokController(account, HomeController.this);
+                            controllers.put(account.shopName, controller);
+                            controller.runNow();
                         } catch (Exception ig) {
                             ig.printStackTrace();
                         }
@@ -226,7 +234,7 @@ public class HomeController implements Initializable, WebDriverCallback {
         Platform.runLater(() -> {
             int type = shop.type;
             if (type == 1) { // Shopee
-                Button button = buttonMapChrome.get(shop.rowId);
+                Button button = buttonMapChrome.get(shop.shopName);
                 if (button == null) {
                     Logger.error("TriggerLogin", "Button is NULL " + shop.shopName);
                     return;
@@ -239,7 +247,7 @@ public class HomeController implements Initializable, WebDriverCallback {
                     button.setStyle("-fx-text-fill: black");
                 }
             } else if (type == 2) { //Tiktok
-                Button button = buttonMapChrome.get(shop.rowId);
+                Button button = buttonMapChrome.get(shop.shopName);
                 if (button == null) {
                     Logger.error("TriggerLogin", "Button is NULL " + shop.shopName);
                     return;
@@ -259,7 +267,7 @@ public class HomeController implements Initializable, WebDriverCallback {
     @Override
     public void expiredCookie(AccountModel shop) {
         Platform.runLater(() -> {
-            Button button = buttonMapChrome.get(shop.rowId);
+            Button button = buttonMapChrome.get(shop.shopName);
             Logger.info("ExpiredCookie", shop.shopName);
             if (button == null) {
                 Logger.error("expiredCookie", "Button is NULL " + shop.shopName);

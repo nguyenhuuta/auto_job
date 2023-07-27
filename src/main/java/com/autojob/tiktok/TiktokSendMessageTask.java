@@ -3,50 +3,61 @@ package com.autojob.tiktok;
 import com.autojob.api.ApiManager;
 import com.autojob.api.RequestQueue;
 import com.autojob.base.WebDriverCallback;
+import com.autojob.database.DatabaseHelper;
 import com.autojob.model.entities.AccountModel;
 import com.autojob.model.entities.BaseResponse;
 import com.autojob.model.entities.TiktokOrderRateBody;
 import com.autojob.utils.ColorConst;
 import javafx.scene.paint.Color;
+import javafx.util.Pair;
 import org.apache.commons.lang3.SystemUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import retrofit2.Call;
 
-import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by OpenYourEyes on 01/06/2023
  */
-class TiktokSendThanksTask extends BaseTiktokTask {
+class TiktokSendMessageTask extends BaseTiktokTask {
     final String urlDetail = "order?selected_sort=6&tab=all";
     List<TiktokOrderRateBody> jsonArray = new ArrayList<>();
+    /**
+     * type = 2: Gửi cảm ơn
+     * type = 4: gửi voucher
+     */
+    int type;
 
-    public TiktokSendThanksTask(AccountModel accountModel, WebDriverCallback webDriverCallback) {
+    public TiktokSendMessageTask(AccountModel accountModel, int type, WebDriverCallback webDriverCallback) {
         super(accountModel, webDriverCallback);
+        this.type = type;
     }
 
     private List<String> orderIds = new ArrayList<>();
 
     @Override
     public String jobName() {
-        return "GỬI CẢM ƠN";
+        if (isSendThank()) {
+            return "GỬI CẢM ƠN";
+        }
+        return "GỬI VOUCHER";
+
 
     }
 
     /**
      * Lấy orderId bởi type
-     * type
-     * 1: Lấy sđt từ đơn hàng
+     * <p>
      * 2: Lấy đơn hàng chưa gửi lời cảm ơn
+     * 4: Lấy đơn hàng gửi voucher
      *
      * @return
      */
     List<String> orderStringByType() throws InterruptedException {
-        Call<BaseResponse<List<String>>> call = ApiManager.BICA_ENDPOINT.orderIdsByType(accountModel.shopId, 2);
+        Call<BaseResponse<List<String>>> call = ApiManager.BICA_ENDPOINT.orderIdsByType(accountModel.shopId, type);
         return RequestQueue.getInstance().executeRequest(call);
     }
 
@@ -59,27 +70,57 @@ class TiktokSendThanksTask extends BaseTiktokTask {
      * Cập nhật SĐT, sendThanks vào đơn hàng
      */
     public void updateOrderToServer() {
-        if (jsonArray.isEmpty()) {
-            return;
+        if (isSendThank()) {
+            if (jsonArray.isEmpty()) {
+                return;
+            }
+            log("Data gửi lên server " + jsonArray);
+            try {
+                printGreen("Đang cập nhật lên server");
+                Call<BaseResponse<Object>> call = ApiManager.BICA_ENDPOINT.updateBuyer(jsonArray);
+                RequestQueue.getInstance().executeRequest(call);
+                printGreen("Cập nhật lên server thành công");
+                jsonArray.clear();
+                delaySecond(60);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                printE("updateOrderToServer lỗi");
+            }
+        } else {
+//            try {
+//                Call<BaseResponse<Object>> call = ApiManager.BICA_ENDPOINT.updateSendVoucher(jsonArray);
+//                RequestQueue.getInstance().executeRequest(call);
+//            } catch (InterruptedException e) {
+//                throw new RuntimeException(e);
+//            }
         }
-        log("Data gửi lên server " + jsonArray);
-        try {
-            printGreen("Đang cập nhật lên server");
-            Call<BaseResponse<Object>> call = ApiManager.BICA_ENDPOINT.updateBuyer(jsonArray);
-            RequestQueue.getInstance().executeRequest(call);
-            printGreen("Cập nhật lên server thành công");
-            jsonArray.clear();
-            delaySecond(60);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            printE("updateOrderToServer lỗi");
-        }
+
+
+    }
+
+    final boolean isSendThank() {
+        return type == 2;
+    }
+
+    final boolean isSendVoucher() {
+        return type == 4;
     }
 
 
     @Override
     public void run() {
         try {
+            findSellerSKU = false;
+            if (isSendVoucher()) {
+                Pair<Integer, String> a = DatabaseHelper.getInstance().getOrderSendVoucher().get(0);
+                try {
+                    Call<BaseResponse<Object>> call = ApiManager.BICA_ENDPOINT.updateSendVoucher(a.getKey(), a.getValue());
+                    RequestQueue.getInstance().executeRequest(call);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                return;
+            }
             delaySecond(3);
             orderIds = orderStringByType();
             printColor("LIST ĐƠN HÀNG: " + orderIds.size(), Color.WHITE, ColorConst.blueviolet);
@@ -102,6 +143,7 @@ class TiktokSendThanksTask extends BaseTiktokTask {
             try {
                 hidePopupReplyLate();
                 String orderId = orderIds.get(index);
+                accountModel.currentOrderId = orderId;
                 String currentIndex = (index + 1) + "/" + size;
                 String format = String.format("============ %s| %s ============", currentIndex, orderId);
                 print(format);
@@ -137,13 +179,16 @@ class TiktokSendThanksTask extends BaseTiktokTask {
                 String buyerName = chatIcon.getText();
                 System.out.println("buyerName " + buyerName);
                 sendChat(buyerName);
-                TiktokOrderRateBody bodyThanks = new TiktokOrderRateBody();
-                bodyThanks.orderId = orderId;
-                bodyThanks.sendThanks = true;
-                jsonArray.add(bodyThanks);
-                if (jsonArray.size() >= 10) {
-                    updateOrderToServer();
+                if (isSendThank()) {
+                    TiktokOrderRateBody bodyThanks = new TiktokOrderRateBody();
+                    bodyThanks.orderId = orderId;
+                    bodyThanks.sendThanks = true;
+                    jsonArray.add(bodyThanks);
+                    if (jsonArray.size() >= 10) {
+                        updateOrderToServer();
+                    }
                 }
+
             } catch (Exception e) {
                 printE("SearchOrder Lỗi " + e);
                 e.printStackTrace();
@@ -177,7 +222,6 @@ class TiktokSendThanksTask extends BaseTiktokTask {
             }
             webDriver.switchTo().window(tabs.get(1));
 
-            String[] array = message();
             WebElement buyerNameElement;
             String text = "";
             int count = 0;
@@ -194,33 +238,95 @@ class TiktokSendThanksTask extends BaseTiktokTask {
                 }
                 count++;
             } while (!buyerName.equals(text));
+
+            if (isSendVoucher()) {
+                selectedProduct(accountModel.sellerSKU);
+            }
+
             WebElement textArea = checkDoneBy(By.xpath("//*[@id='chat-input-textarea']/textarea"), "ChatInput", 10);
             print("Hiển thị chat thành công");
             delaySecond(2);
-            for (String value : array) {
-                textArea.sendKeys(value);
-                textArea.sendKeys(Keys.SHIFT, Keys.ENTER);
+            if (isSendThank()) {
+                String[] array = message();
+                for (String value : array) {
+                    textArea.sendKeys(value);
+                    textArea.sendKeys(Keys.SHIFT, Keys.ENTER);
+                }
+                textArea.sendKeys(Keys.ENTER);
             }
-            textArea.sendKeys(Keys.ENTER);
+            if (isSendVoucher()) {
+                String message = accountModel.contentVoucher;
+                textArea.sendKeys(message);
+                textArea.sendKeys(Keys.ENTER);
+                DatabaseHelper.getInstance().updateOrderSendVoucherAccount(accountModel);
+            }
             print("Gửi chat thành công");
         } catch (Exception exception) {
             printException(exception);
             exception.printStackTrace();
         } finally {
             delayBetween(10, 20);
-//            webDriver.close();
             webDriver.switchTo().window(tabs.get(0));
             print("Tắt chat");
         }
     }
 
+    boolean findSellerSKU = false;
+
+    void selectedProduct(String sellSKU) {
+        try {
+            if (sellSKU == null || sellSKU.isEmpty()) {
+                return;
+            }
+            if (!findSellerSKU) {
+                WebElement element = elementBy(By.id("theme-arco-tabs-0-tab-1"), "TabSanPham");
+                if (element == null) {
+                    printE("Không tìm thấy tab sản phẩm");
+                    return;
+                }
+                print("Click Tab sản phẩm ");
+                element.click();
+                delaySecond(1);
+                WebElement parent = elementBy(By.id("theme-arco-tabs-0-panel-1"), "", 3);
+
+                List<WebElement> inputs = elementsBy(By.xpath("//input[@data-tid='m4b_input']"), "InputSearch", 10);
+                if (inputs.isEmpty()) {
+                    printE("Không tìm thấy InputSearchSellerSKU");
+                    return;
+                }
+                WebElement input = inputs.get(1);
+                print("Tìm kiếm " + sellSKU);
+                input.sendKeys(sellSKU);
+                delayMilliSecond(400);
+                input.sendKeys(Keys.ENTER);
+            }
+            WebElement buttonSendProduct = elementBy(By.id("chat-workbench-product-send-product-card-0"), "buttonSendProduct");
+            if (buttonSendProduct == null) {
+                printE("KHông tìm thấy buttonSendProduct");
+                return;
+            }
+            print("Click gửi sản phẩm");
+            buttonSendProduct.click();
+            findSellerSKU = true;
+        } catch (Exception exception) {
+
+        }
+
+    }
+
     private String[] message() {
+        if (isSendThank()) {
+            return new String[]{
+                    "Shop thấy bạn đã nhận hàng",
+                    "Không biết sản phẩm bên mình bạn có hài lòng không ạ?",
+                    "Hàng bên mình được đổi trả trong 3 ngày.",
+                    "Nếu bạn hài lòng hãy ĐÁNH GIÁ cho shop 5* nhé ^^.",
+                    "ĐỪNG VỘI ĐÁNH GIÁ XẤU nếu sản phẩm có vấn đề, hãy nhắn tin hoặc liên hệ: 0342.092.686 để shop xử lý ngay ạ."
+            };
+        }
         return new String[]{
-                "Shop thấy bạn đã nhận hàng",
-                "Không biết sản phẩm bên mình bạn có hài lòng không ạ?",
-                "Hàng bên mình được đổi trả trong 3 ngày.",
-                "Nếu bạn hài lòng hãy ĐÁNH GIÁ cho shop 5* nhé ^^.",
-                "ĐỪNG VỘI ĐÁNH GIÁ XẤU nếu sản phẩm có vấn đề, hãy nhắn tin hoặc liên hệ: 0342.092.686 để shop xử lý ngay ạ."
+                accountModel.contentVoucher
         };
+
     }
 }

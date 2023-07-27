@@ -88,15 +88,15 @@ public class WebDriverUtils {
         chromeOptions.setExperimentalOption("useAutomationExtension", false);
 
 
-        DesiredCapabilities capabilities = DesiredCapabilities.chrome();
-        LoggingPreferences logPrefs = new LoggingPreferences();
-        logPrefs.enable(LogType.PERFORMANCE, Level.ALL);
-//        capabilities.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
-        capabilities.setCapability("goog:loggingPrefs", logPrefs);
-        capabilities.setCapability(ChromeOptions.CAPABILITY, chromeOptions);
-        webDriver = new ChromeDriver(capabilities);
+//        DesiredCapabilities capabilities = DesiredCapabilities.chrome();
+//        LoggingPreferences logPrefs = new LoggingPreferences();
+//        logPrefs.enable(LogType.PERFORMANCE, Level.ALL);
+////        capabilities.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
+//        capabilities.setCapability("goog:loggingPrefs", logPrefs);
+//        capabilities.setCapability(ChromeOptions.CAPABILITY, chromeOptions);
+//        webDriver = new ChromeDriver(capabilities);
 
-//        webDriver = new ChromeDriver(chromeOptions);
+        webDriver = new ChromeDriver(chromeOptions);
         synchronized (webDriverList) {
             webDriverList.add(webDriver);
         }

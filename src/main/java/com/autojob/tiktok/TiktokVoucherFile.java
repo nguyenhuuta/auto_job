@@ -1,4 +1,4 @@
-package com.autojob.shopee;
+package com.autojob.tiktok;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -9,11 +9,11 @@ import java.util.Scanner;
 /**
  * Created by OpenYourEyes on 19/07/2023
  */
-public class ShopeeFile {
+public class TiktokVoucherFile {
 
     static String path() {
         String parentPath = Paths.get("").toAbsolutePath().toString();
-        return parentPath + File.separator + "data/shopee.txt";
+        return parentPath + File.separator + "data/tiktok_order_voucher.txt";
     }
 
     public static void createFile() {

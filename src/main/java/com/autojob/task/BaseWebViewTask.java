@@ -840,13 +840,62 @@ public abstract class BaseWebViewTask implements IRegisterStopApp {
 
     public int numberRetry = 10;
 
+
+    public WebElement elementBy(By by, String tag) throws InterruptedException {
+        return elementBy(by,tag,10);
+    }
+
+    public List<WebElement> elementsBy(By by, String tag) throws InterruptedException {
+        return elementsBy(by,tag,10);
+    }
+
+    public List<WebElement> elementsBy(By by, String tag, int numberRetry) throws InterruptedException {
+        List<WebElement> elements = new ArrayList<>();
+        int count = 1;
+        do {
+            if (count > numberRetry) {
+                printE("CheckDoneBy: " + tag + " Hết số lần thử");
+                screenShotFull(tag);
+                return null;
+            }
+            try {
+                elements = webDriver.findElements(by);
+            } catch (Exception ignore) {
+
+            }
+            delaySecond(2);
+            count++;
+        } while (elements.isEmpty());
+        return elements;
+    }
+    public WebElement elementBy(By by, String tag, int numberRetry) {
+        WebElement element;
+        int count = 1;
+        do {
+            print("count " + count +"/" + numberRetry) ;
+            if (count > numberRetry) {
+                printE("CheckDoneBy: " + tag + " Hết số lần thử");
+                screenShotFull(tag);
+                return null;
+            }
+            try {
+                element = webDriver.findElement(by);
+            } catch (Exception ignore) {
+                element = null;
+            }
+            delaySecond(2);
+            count++;
+        } while (element == null);
+        return element;
+    }
+
     public WebElement checkDoneBy(By by, String tag, int numberRetry) throws InterruptedException {
         WebElement element;
         int count = 1;
         do {
             if (count > numberRetry) {
                 printE("CheckDoneBy: " + tag + " Hết số lần thử");
-                playSoundError();
+//                playSoundError();
                 screenShotFull(tag);
                 updateApi();
                 return null;

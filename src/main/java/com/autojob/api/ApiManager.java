@@ -28,6 +28,7 @@ public interface ApiManager {
     // type = 1 lấy sđt
     // type = 2 chưa rate
     // type = 3 đồng bộ đơn affiliate
+    // 4: Lấy đơn hàng gửi voucher
     @GET("tiktok/orderIdsBy")
     @Headers("Accept: application/json")
     Call<BaseResponse<List<String>>> orderIdsByType(@Query("tiktokKeyId") int tiktokKeyId, @Query("type") int type);
@@ -39,4 +40,9 @@ public interface ApiManager {
     @POST("tiktok/updateOrderAffiliate")
     @Headers("Accept: application/json")
     Call<BaseResponse<Object>> updateAffiliateOrder(@Body() List<TiktokAffiliateOrderBody> body);
+
+    @GET("tiktok/updateSendVoucher")
+    @Headers("Accept: application/json")
+    Call<BaseResponse<Object>> updateSendVoucher(@Query("shopId") int tiktokKeyId, @Query("orderId") String String);
+
 }
