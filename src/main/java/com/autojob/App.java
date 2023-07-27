@@ -2,6 +2,7 @@ package com.autojob;
 
 import com.autojob.database.DatabaseHelper;
 import com.autojob.gui.splash.SplashScreen;
+import com.autojob.shopee.ShopeeFile;
 import com.autojob.utils.IRegisterStopApp;
 import com.autojob.utils.Utils;
 import com.autojob.utils.WebDriverUtils;
@@ -14,20 +15,19 @@ import javafx.stage.Stage;
 import org.apache.commons.lang3.SystemUtils;
 import org.openqa.selenium.chrome.ChromeDriverService;
 import rx.Observable;
-import rx.functions.Action1;
 import rx.subjects.PublishSubject;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class App extends Application {
     public static boolean debug = true;
-    private ExecutorService service;
     private static App instance;
     private List<IRegisterStopApp> listCallbackRegisterStopApp;
 
@@ -42,10 +42,9 @@ public class App extends Application {
         App.instance = app;
     }
 
-    PublishSubject<Boolean> triggerPlaySound = PublishSubject.create();
-
     static {
         DatabaseHelper.getInstance();
+        ShopeeFile.createFile();
     }
 
     public static void setupWebDriver() {
@@ -57,7 +56,6 @@ public class App extends Application {
             Utils.grantFilePermission(webDriver);
             System.setProperty(ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY, userDir + "/ChromeMac/chromedriver");
         }
-
     }
 
     public static void main(String[] args) {
@@ -115,11 +113,10 @@ public class App extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        displaySplashScreen(primaryStage);
+//        displaySplashScreen(primaryStage);
         listCallbackRegisterStopApp = new ArrayList<>();
         startApp = true;
         setInstance(this);
-        service = Executors.newCachedThreadPool();
         mStage = primaryStage;
         startApp = false;
     }
@@ -135,10 +132,6 @@ public class App extends Application {
         Platform.exit();
     }
 
-    public ExecutorService getService() {
-        return service;
-    }
-
     public void registerStopApp(IRegisterStopApp callback) {
         this.listCallbackRegisterStopApp.add(callback);
     }
@@ -147,7 +140,7 @@ public class App extends Application {
         APP_STOPPING = true;
     }
 
-    private  void addEventWhenShutdownApp() {
+    private void addEventWhenShutdownApp() {
         //Add event when turn off application
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Shutdown application!");

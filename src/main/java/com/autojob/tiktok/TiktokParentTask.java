@@ -53,14 +53,12 @@ public class TiktokParentTask extends TimerTask {
             orderDetailTask.updateListView("Ngoài giờ hoạt động 8h -> 22h");
             return;
         }
-        if (accountModel.expired == null) {
-            Set<Cookie> cookieSet = orderDetailTask.webDriver.manage().getCookies();
-            for (Cookie cookie : cookieSet) {
-                String code = cookie.getName();
-                if ("sso_uid_tt_ss_ads".equals(code)) {
-                    accountModel.expired = cookie.getExpiry();
-                    break;
-                }
+        Set<Cookie> cookieSet = orderDetailTask.webDriver.manage().getCookies();
+        for (Cookie cookie : cookieSet) {
+            String code = cookie.getName();
+            if ("sso_uid_tt_ss_ads".equals(code)) {
+                accountModel.expired = cookie.getExpiry();
+                break;
             }
         }
 

@@ -1,26 +1,26 @@
 package com.autojob.database;
 
+import java.util.Date;
+
 public class DataContract {
 
-    static class Preference {
+    static class Account {
 
-        public static final String TABLE_NAME = "Preference";
+        public static final String TABLE_NAME = "Account";
 
-        public static final String COLUMN_USER_ID = "id";
+        public static final String id = "id";
 
-        public static final String COLUMN_IS_LOGIN = "IsLogin";
+        public static final String shopId = "shopId";
 
-        public static final String COLUMN_HOST = "host";
+        public static final String shopName = "shopName";
 
-        public static final String COLUMN_TOKEN = "token";
+        public static final String type = "type";
 
-        public static final String COLUMN_SETTING = "setting";
+        public static final String lastOrderId = "lastOrderId";
 
-        public static final String COLUMN_POSITION_CATEGORY = "position_category";
+        public static final String rowId = "rowId";
 
-        public static final String COLUMN_TEST = "test";
-
-        private Preference() {
+        private Account() {
             //no instance
         }
     }

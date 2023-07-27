@@ -4,15 +4,11 @@ import com.autojob.base.BaseController;
 import com.autojob.base.WebDriverCallback;
 import com.autojob.model.entities.AccountModel;
 import com.autojob.model.entities.ChromeSetting;
-import com.autojob.model.entities.MessageListView;
-import com.autojob.task.BaseWebViewTask;
-import com.autojob.tiktok.*;
 import com.autojob.utils.TimeUtils;
 import com.autojob.utils.WebDriverUtils;
 import javafx.scene.paint.Color;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
-import rx.subjects.BehaviorSubject;
 
 import java.util.Calendar;
 import java.util.Set;
@@ -26,7 +22,10 @@ import java.util.concurrent.TimeUnit;
  */
 public class ShopeeController extends BaseController {
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+    static final String SHOPEE_ENDPOINT = "https://banhang.shopee.vn/";
+    String SHOPEE_LOGIN = SHOPEE_ENDPOINT + "seller/login";
     BaseShopeeTask sendThankTask;
+    BaseShopeeTask feedbackTask;
 
     public ShopeeController(AccountModel model, WebDriverCallback webDriverCallback) {
         super(model);
@@ -63,14 +62,12 @@ public class ShopeeController extends BaseController {
                 sendThankTask.updateListView("Ngoài giờ hoạt động 8h -> 22h");
                 return;
             }
-            if (accountModel.expired == null) {
-                Set<Cookie> cookieSet = sendThankTask.webDriver.manage().getCookies();
-                for (Cookie cookie : cookieSet) {
-                    String code = cookie.getName();
-                    if ("sso_uid_tt_ss_ads".equals(code)) {
-                        accountModel.expired = cookie.getExpiry();
-                        break;
-                    }
+            Set<Cookie> cookieSet = sendThankTask.webDriver.manage().getCookies();
+            for (Cookie cookie : cookieSet) {
+                String code = cookie.getName();
+                if ("sso_uid_tt_ss_ads".equals(code)) {
+                    accountModel.expired = cookie.getExpiry();
+                    break;
                 }
             }
             sendThankTask.webDriverCallback.expiredCookie(accountModel);
@@ -92,28 +89,23 @@ public class ShopeeController extends BaseController {
 
     private void checkLogin() {
         System.out.println("CheckLogin");
-        sendThankTask.load(ShopeeSendThanksTask.SHOPEE_ORDER_COMPLETE);
-        sendThankTask.delaySecond(5);
-        String currentUrl = sendThankTask.webDriver.getCurrentUrl();
-        System.out.println(currentUrl);
-        boolean needLogin = currentUrl.contains("login");
+        sendThankTask.load(SHOPEE_LOGIN);
+        sendThankTask.delaySecond(10);
+        boolean needLogin = sendThankTask.getElementById("main") != null;
         WebDriverCallback webDriverCallback = sendThankTask.webDriverCallback;
         if (needLogin) {
             webDriverCallback.triggerLogin(accountModel, true);
             sendThankTask.printE(accountModel.shopName + " CHƯA LOGIN, YÊU CẦU LOGIN");
             do {
-                sendThankTask.print("đợi 60s");
+                sendThankTask.print("đợi 20s");
                 sendThankTask.delaySecond(20);
-                currentUrl = sendThankTask.webDriver.getCurrentUrl();
-                System.out.println(currentUrl);
-                needLogin = currentUrl.contains("login");
+                needLogin = sendThankTask.getElementById("main") != null;
             } while (needLogin);
             sendThankTask.delaySecond(10);
         }
         webDriverCallback.triggerLogin(accountModel, false);
         executorService.scheduleWithFixedDelay(timerTask, 0, 10, TimeUnit.MINUTES);
     }
-
 }
 
 

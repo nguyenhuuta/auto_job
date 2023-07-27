@@ -1,8 +1,8 @@
 package com.autojob.database;
 
-import com.sun.org.apache.xerces.internal.impl.io.UTF8Reader;
+import com.autojob.database.core.Cursor;
 import com.autojob.database.core.CustomStatement;
-import com.autojob.utils.Constants;
+import com.autojob.model.entities.AccountModel;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -65,96 +65,71 @@ public class DatabaseHelper {
     public void createTable() {
         try {
             Statement statement = connection.createStatement();
-            createTablePreference(statement);
+            createTableAccount(statement);
         } catch (SQLException e) {
             System.out.println("DatabaseHelper " + e.toString());
         }
     }
 
-//    private void insertTransaction(WaterMazon waterMazon) {
-//        if (waterMazon != null && isNotExitsTransaction(waterMazon)) {
-//            try {
-//
-//                String sql = "INSERT INTO " + DataContract.Transaction.TABLE_NAME
-//                        + " ("
-//                        + DataContract.Transaction.COLUMN_ID_SERVER + ","
-//                        + DataContract.Transaction.COLUMN_AMAZON_ORDER_ID + ","
-//                        + DataContract.Transaction.COLUMN_AMAZON_ORDER_ITEM_ID + ","
-//                        + DataContract.Transaction.COLUMN_ASIN + ","
-//                        + DataContract.Transaction.COLUMN_SKU + ","
-//                        + DataContract.Transaction.COLUMN_PRODUCT_NAME + ","
-//                        + DataContract.Transaction.COLUMN_ORDER_STATUS + ","
-//                        + DataContract.Transaction.COLUMN_PRICE_AMAZON + ","
-//                        + DataContract.Transaction.COLUMN_SHIPPING_PRICE + ","
-//                        + DataContract.Transaction.COLUMN_QUANTITY_ORDER + ","
-//                        + DataContract.Transaction.COLUMN_BUYER_NAME + ","
-//                        + DataContract.Transaction.COLUMN_SHIPPING_ADDRESS + ","
-//                        + DataContract.Transaction.COLUMN_CONDITION_NOTE + ","
-//                        + DataContract.Transaction.COLUMN_CURRENT_PRICE_YAHOO + ","
-//                        + DataContract.Transaction.COLUMN_PURCHASE_PRICE + ","
-//                        + DataContract.Transaction.COLUMN_BUY_NOW_PRICE + ","
-//                        + DataContract.Transaction.COLUMN_AUCTION_PROFIT + ","
-//                        + DataContract.Transaction.COLUMN_BUY_NOW_PROFIT + ","
-//                        + DataContract.Transaction.COLUMN_PROFIT + ","
-//                        + DataContract.Transaction.COLUMN_TIME_EXPIRED + ","
-//                        + DataContract.Transaction.COLUMN_IMAGE_PRODUCT + ","
-//                        + DataContract.Transaction.COLUMN_PURCHASE_DATE_AMAZON + ","
-//                        + DataContract.Transaction.COLUMN_DETAIL_YAHOO_PRODUCT + ","
-//                        + DataContract.Transaction.COLUMN_SELLER_AUCTION + ","
-//                        + DataContract.Transaction.COLUMN_STATUS
-//                        + ")"
-//                        + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-//
-//                PreparedStatement pstmt = connection.prepareStatement(sql);
-//                pstmt.setInt(1, waterMazon.getId());
-//                pstmt.setString(2, waterMazon.getAmazonOrderId());
-//                pstmt.setString(3, waterMazon.getAmazonOrderItemId());
-//                pstmt.setString(4, waterMazon.getAsin());
-//                pstmt.setString(5, waterMazon.getSellerSKU());
-//                pstmt.setString(6, waterMazon.getProductName());
-//                pstmt.setString(7, waterMazon.getOrderStatus());
-//                pstmt.setInt(8, waterMazon.getPriceAmazon());
-//                pstmt.setInt(9, waterMazon.getShippingPrice());
-//                pstmt.setInt(10, waterMazon.getQuantityOrder());
-//                pstmt.setString(11, waterMazon.getBuyerName());
-//                pstmt.setString(12, waterMazon.getJsonAddress());
-//                pstmt.setString(13, waterMazon.getConditionNote());
-//                pstmt.setInt(14, waterMazon.getCurrentPriceYahoo());
-//                pstmt.setInt(15, waterMazon.getPurchasePrice());
-//                pstmt.setInt(16, waterMazon.getBuyNowPrice());
-//                pstmt.setInt(17, waterMazon.getAuctionProfit());
-//                pstmt.setInt(18, waterMazon.getBuyNowProfit());
-//                pstmt.setInt(19, waterMazon.getProfit());
-//                pstmt.setLong(20, waterMazon.getTimeExpired());
-//                pstmt.setString(21, waterMazon.getImageProduct());
-//                pstmt.setLong(22, waterMazon.getPurchaseDateAmazon());
-//                pstmt.setString(23, waterMazon.getJsonDetailYahoo());
-//                pstmt.setString(24, waterMazon.getSellerAuctionId());
-//                pstmt.setInt(25, waterMazon.getStatusProduct());
-//                pstmt.executeUpdate();
-//            } catch (SQLException e) {
-//                print("SQLException insertTransaction " + e.toString());
-//            }
-//        }
-//    }
-//    private void saveVersionDatabase(String json) {
-//        try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(DatabaseHelper.DIRECTORY + "/" + DatabaseHelper.DATABASE_VERSION, false), StandardCharsets.UTF_8))) {
-//            bw.write(json);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-    private void createTablePreference(Statement statement) {
+    public void insertAccount(AccountModel accountModel) {
         try {
-            String sql = "CREATE TABLE IF NOT EXISTS " + DataContract.Preference.TABLE_NAME
+
+            String sql = "INSERT INTO " + DataContract.Account.TABLE_NAME
+                    + " ("
+                    + DataContract.Account.shopId + ","
+                    + DataContract.Account.shopName + ","
+                    + DataContract.Account.type + ","
+                    + DataContract.Account.lastOrderId + ","
+                    + DataContract.Account.rowId
+                    + ")"
+                    + " VALUES (?,?,?,?,?)";
+
+            PreparedStatement pstmt = connection.prepareStatement(sql);
+            pstmt.setInt(1, accountModel.shopId);
+            pstmt.setString(2, accountModel.shopName);
+            pstmt.setInt(3, accountModel.type);
+            pstmt.setString(4, accountModel.lastOrderId);
+            pstmt.setString(5, accountModel.rowId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("SQLException insertTransaction " + e.toString());
+        }
+    }
+
+    public void getAccount() {
+
+        try {
+            String query = "SELECT * FROM " + DataContract.Account.TABLE_NAME;
+            PreparedStatement preparedStatement = DatabaseHelper.getInstance().createPrepareStatement(query);
+            Cursor cursor = new Cursor(preparedStatement.executeQuery());
+            if (cursor.moveToFirst()) {
+                do {
+//                    AmazonProduct amazonProduct = new AmazonProduct();
+//                    AccountModel accountModel = new AccountModel();
+//                    amazonProduct.columnId = cursor.getInts(DataContract.Account.COLUMN_ID);
+//                    amazonProduct.setAsinId(cursor.getStrings(DataContract.AmazonProductLocal.COLUMN_ASIN));
+//
+//                    listResult.add(AmazonProduct.fromCursor(cursor));
+                } while (cursor.moveToNext());
+            } else {
+                cursor.onClose();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void createTableAccount(Statement statement) {
+        try {
+            String sql = "CREATE TABLE IF NOT EXISTS " + DataContract.Account.TABLE_NAME
                     + "("
-                    + DataContract.Preference.COLUMN_USER_ID + " INTEGER,"
-                    + DataContract.Preference.COLUMN_IS_LOGIN + " INTEGER,"
-                    + DataContract.Preference.COLUMN_HOST + " VARCHAR,"
-                    + DataContract.Preference.COLUMN_TOKEN + " TEXT,"
-                    + DataContract.Preference.COLUMN_SETTING + " TEXT,"
-                    + DataContract.Preference.COLUMN_POSITION_CATEGORY + " INTEGER "
+                    + DataContract.Account.id + " INTEGER PRIMARY KEY AUTO_INCREMENT,"
+                    + DataContract.Account.shopId + " INTEGER,"
+                    + DataContract.Account.shopName + " VARCHAR,"
+                    + DataContract.Account.type + " INTEGER,"
+                    + DataContract.Account.lastOrderId + " VARCHAR,"
+                    + DataContract.Account.rowId + " VARCHAR"
                     + ")";
             statement.execute(sql);
         } catch (SQLException e) {

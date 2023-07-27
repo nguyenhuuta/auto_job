@@ -23,10 +23,9 @@ import java.util.Objects;
  * Created by OpenYourEyes on 04/05/2023
  */
 public class ShopeeSendThanksTask extends BaseShopeeTask {
-    static final String SHOPEE_ENDPOINT = "https://banhang.shopee.vn/";
-    static final String SHOPEE_URL = SHOPEE_ENDPOINT + "webchat/conversations";
-    static final String shopeeNotificaions = SHOPEE_ENDPOINT + "portal/notification/order-updates/";
-    static final String SHOPEE_ORDER_COMPLETE = SHOPEE_ENDPOINT + "portal/sale/order?type=completed";
+    //    static final String SHOPEE_URL = SHOPEE_ENDPOINT + "webchat/conversations";
+//    static final String shopeeNotificaions = SHOPEE_ENDPOINT + "portal/notification/order-updates/";
+    static final String SHOPEE_ORDER_COMPLETE = ShopeeController.SHOPEE_ENDPOINT + "portal/sale/order?type=completed";
 
     public ShopeeSendThanksTask(AccountModel accountModel, WebDriverCallback callback) {
         super(accountModel, callback);
@@ -71,6 +70,7 @@ public class ShopeeSendThanksTask extends BaseShopeeTask {
                     String userName = getElementByClassName(item, "username").getText();
                     String format = String.format("============ %s| %s ============", (count + 1), userName + "|" + orderId);
                     print(format);
+//                    sendRate(item);
                     WebElement miniChat = getElementByClassName(item, "mini-chat");
                     print("Gửi cảm ơn đến " + userName);
                     sendChat(miniChat);
@@ -87,6 +87,38 @@ public class ShopeeSendThanksTask extends BaseShopeeTask {
             printE("SendChatAllUser Exception " + e);
         }
     }
+
+    private void sendRate(WebElement item) {
+        try {
+            WebElement rate = item.findElement(By.xpath("//div[contains(@class, 'item-action')]/button"));
+            rate.click();
+            delaySecond(2);
+
+            WebElement dialog = getElementByClassName("shopee-modal__content--large");
+            if (dialog == null) {
+                printE("Dialog rate null");
+                return;
+            }
+
+            List<WebElement> starts = getElementsByClassName(dialog, "shopee-rate-star__back");
+            if (starts != null && starts.size() == 5) {
+                starts.get(4).click();
+                delaySecond(2);
+            } else {
+                printE("Starts IS NULL OR size != 5");
+            }
+            List<WebElement> buttonSend = getElementsByTagName(dialog, "button");
+            if (buttonSend != null && buttonSend.size() == 2) {
+                buttonSend.get(1).click();
+                delaySecond(2);
+            } else {
+                printE("buttonSend IS NULL OR size != 2");
+            }
+        } catch (Exception ignore) {
+
+        }
+    }
+
 
     private void sendChat(WebElement miniChat) throws InterruptedException {
         if (miniChat != null && miniChat.isDisplayed()) { // Truờng hợp user bị block sẽ bị ẩn minichat
